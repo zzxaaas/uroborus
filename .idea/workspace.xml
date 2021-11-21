@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="be6a63e6-c4f9-45d1-b782-d7d2ffb32b36" name="Default Changelist" comment="feat:init">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Go File" />
+      </list>
+    </option>
+  </component>
+  <component name="GOROOT" path="$PROJECT_DIR$/../../../../Env/Go" />
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectId" id="210T6XiD51EGt82CPXJrdL6HCRH" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="DefaultGoTemplateProperty" value="Go File" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="configurable.Global.GOPATH.is.expanded" value="true" />
+    <property name="configurable.Module.GOPATH.is.expanded" value="false" />
+    <property name="configurable.Project.GOPATH.is.expanded" value="true" />
+    <property name="go.import.settings.migrated" value="true" />
+    <property name="go.sdk.automatically.set" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/common/setting" />
+    <property name="settings.editor.selected.configurable" value="org.jetbrains.plugins.github.ui.GithubSettingsConfigurable" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="E:\Code\GoProjects\src\uroborus\store\fx" />
+      <recent name="E:\Code\GoProjects\src\uroborus\service\fx" />
+      <recent name="E:\Code\GoProjects\src\uroborus\server\fx" />
+      <recent name="E:\Code\GoProjects\src\uroborus\server\doc" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="E:\Code\GoProjects\src\uroborus\common\setting" />
+      <recent name="E:\Code\GoProjects\src\uroborus\store" />
+      <recent name="E:\Code\GoProjects\src\uroborus\service" />
+      <recent name="E:\Code\GoProjects\src\uroborus\controller" />
+      <recent name="E:\Code\GoProjects\src\uroborus\common" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="go build uroborus/cmd" type="GoApplicationRunConfiguration" factoryName="Go Application" nameIsGenerated="true">
+      <module name="uroborus" />
+      <working_directory value="$PROJECT_DIR$" />
+      <go_parameters value="-i" />
+      <kind value="DIRECTORY" />
+      <filePath value="$PROJECT_DIR$" />
+      <package value="uroborus" />
+      <directory value="$PROJECT_DIR$/cmd" />
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="feat:init" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat:init" />
+  </component>
+  <component name="VgoProject">
+    <integration-enabled>true</integration-enabled>
+    <environment>
+      <map>
+        <entry key="GOPROXY" value="https://goproxy.io" />
+      </map>
+    </environment>
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="414" y="174" width="1092" height="716" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1637250271067">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="414" y="174" width="1092" height="716" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1637250271067" />
+    <state x="558" y="5" key="CommitChangelistDialog2" timestamp="1637476448435">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="558" y="5" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1637476448435" />
+    <state x="847" y="373" key="EnvironmentVariablesDialog" timestamp="1637166144553">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="847" y="373" key="EnvironmentVariablesDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1637166144553" />
+    <state x="740" y="274" key="FileChooserDialogImpl" timestamp="1637251243405">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="740" y="274" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1637251243405" />
+    <state width="1877" height="361" key="GridCell.Tab.0.bottom" timestamp="1637253025389">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1877" height="361" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1637253025389" />
+    <state width="1877" height="361" key="GridCell.Tab.0.center" timestamp="1637253025389">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1877" height="361" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1637253025389" />
+    <state width="1877" height="361" key="GridCell.Tab.0.left" timestamp="1637253025389">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1877" height="361" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1637253025389" />
+    <state width="1877" height="361" key="GridCell.Tab.0.right" timestamp="1637253025389">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1877" height="361" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1637253025389" />
+    <state width="1877" height="361" key="GridCell.Tab.1.bottom" timestamp="1637253025389">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1877" height="361" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1637253025389" />
+    <state width="1877" height="361" key="GridCell.Tab.1.center" timestamp="1637253025389">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1877" height="361" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1637253025389" />
+    <state width="1877" height="361" key="GridCell.Tab.1.left" timestamp="1637253025389">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1877" height="361" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1637253025389" />
+    <state width="1877" height="361" key="GridCell.Tab.1.right" timestamp="1637253025389">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1877" height="361" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1637253025389" />
+    <state x="461" y="164" key="SettingsEditor" timestamp="1637476874366">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="461" y="164" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1637476874366" />
+    <state x="552" y="252" key="Vcs.Push.Dialog.v2" timestamp="1637476443617">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="552" y="252" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1637476443617" />
+    <state x="663" y="124" width="594" height="792" key="find.popup" timestamp="1637251912897">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="663" y="124" width="594" height="792" key="find.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1637251912897" />
+  </component>
+</project>
