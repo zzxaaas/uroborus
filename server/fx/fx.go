@@ -9,4 +9,5 @@ import (
 var Module = fx.Options(
 	fx.Provide(NewHealthServer),
 	fx.Provide(NewProjectServer),
+	fx.Provide(NewUserServer),
 )

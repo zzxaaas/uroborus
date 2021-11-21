@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"uroborus/common/logging"
 	settings "uroborus/common/setting"
+	"uroborus/router/middleware"
 	"uroborus/server"
 	"uroborus/server/doc/swagger"
 )
@@ -15,6 +16,7 @@ type Router struct {
 	config       *settings.Config
 	logger       *logging.ZapLogger
 	healthServer *server.HealthServer
+	userServer   *server.UserServer
 }
 
 // NewRouter Generator
@@ -22,11 +24,13 @@ func NewRouter(
 	config *settings.Config,
 	logger *logging.ZapLogger,
 	healthServer *server.HealthServer,
+	userServer *server.UserServer,
 ) *Router {
 	return &Router{
 		config:       config,
 		logger:       logger,
 		healthServer: healthServer,
+		userServer:   userServer,
 	}
 }
 
@@ -46,17 +50,25 @@ func NewHTTPServer(router *Router, option ServerOption) *http.Server {
 }
 
 // Server main server
-func (r *Router) Server(middleware ...gin.HandlerFunc) *gin.Engine {
+func (r *Router) Server(middlewares ...gin.HandlerFunc) *gin.Engine {
 	gin.DisableConsoleColor()
 	app := gin.New()
 	// Setup middlewares
-	app.Use(middleware...)
+	app.Use(middlewares...)
 	// Api router
 	app.GET("/swagger.json", swagger.Serve)
 	{
 		baseEngine := app.Group(r.config.ApiPrefix + ApiV1)
 		{
 			baseEngine.GET("/health", r.healthServer.CheckV1)
+			baseEngine.Use(middleware.Auth())
+			baseEngine.GET("/health/auth", r.healthServer.CheckV1)
+
+		}
+		{
+			userRoute := app.Group(baseEngine.BasePath() + "/user")
+			userRoute.PUT("", r.userServer.Register)
+			userRoute.POST("", r.userServer.Login)
 		}
 	}
 	return app

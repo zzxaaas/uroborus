@@ -6,3 +6,6 @@ postgres:
   user: "root"
   passwd: "root"
   batchSize: 3000
+
+user:
+  rootPath: "./user/uroborus"

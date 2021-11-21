@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 	"net/http"
+	"uroborus/common/auth"
 )
 
 // HealthServer 健康检查
@@ -23,5 +24,6 @@ func (s *HealthServer) CheckV1(c *gin.Context) {
 		"env":          viper.GetString("env"),
 		"commit_id":    "",
 		"dependencies": gin.H{},
+		"user":         c.GetString(auth.IDTokenSubjectContextKey),
 	})
 }
