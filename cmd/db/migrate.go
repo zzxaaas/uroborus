@@ -30,6 +30,7 @@ func main() {
 	}
 	models := []interface{}{
 		&model.User{},
+		&model.Project{},
 	}
 	if *shouldDrop {
 		if err := db.Migrator().DropTable(models...); err != nil {

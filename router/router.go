@@ -13,10 +13,11 @@ import (
 
 // Router router
 type Router struct {
-	config       *settings.Config
-	logger       *logging.ZapLogger
-	healthServer *server.HealthServer
-	userServer   *server.UserServer
+	config        *settings.Config
+	logger        *logging.ZapLogger
+	healthServer  *server.HealthServer
+	userServer    *server.UserServer
+	projectServer *server.ProjectServer
 }
 
 // NewRouter Generator
@@ -25,12 +26,14 @@ func NewRouter(
 	logger *logging.ZapLogger,
 	healthServer *server.HealthServer,
 	userServer *server.UserServer,
+	projectServer *server.ProjectServer,
 ) *Router {
 	return &Router{
-		config:       config,
-		logger:       logger,
-		healthServer: healthServer,
-		userServer:   userServer,
+		config:        config,
+		logger:        logger,
+		healthServer:  healthServer,
+		userServer:    userServer,
+		projectServer: projectServer,
 	}
 }
 
@@ -69,6 +72,12 @@ func (r *Router) Server(middlewares ...gin.HandlerFunc) *gin.Engine {
 			userRoute := app.Group(baseEngine.BasePath() + "/user")
 			userRoute.PUT("", r.userServer.Register)
 			userRoute.POST("", r.userServer.Login)
+		}
+		{
+			projectRoute := app.Group(baseEngine.BasePath() + "/project")
+			projectRoute.Use(middleware.Auth())
+			projectRoute.PUT("", r.projectServer.Register)
+			projectRoute.POST("/checkout", r.projectServer.CheckOut)
 		}
 	}
 	return app

@@ -9,4 +9,5 @@ import (
 var Module = fx.Options(
 	fx.Provide(NewPgDB),
 	fx.Provide(NewUserStore),
+	fx.Provide(NewProjectStore),
 )
