@@ -28,16 +28,16 @@ func (s GitService) Clone(directory string, isBare bool, options *git.CloneOptio
 }
 
 func (s GitService) Checkout(directory, branch, url string) error {
-	r, err := git.PlainClone(directory, true, &git.CloneOptions{
-		URL: url,
-	})
+	r, err := git.PlainOpen(directory)
 	if err != nil && err != git.ErrRepositoryAlreadyExists {
 		return err
 	}
 	w, err := r.Worktree()
-
+	localRef := plumbing.NewBranchReferenceName(branch)
 	err = w.Checkout(&git.CheckoutOptions{
-		Branch: plumbing.NewBranchReferenceName(branch),
+		Branch: localRef,
+		Create: true,
 	})
+	err = w.Pull(&git.PullOptions{RemoteName: "origin"})
 	return err
 }
