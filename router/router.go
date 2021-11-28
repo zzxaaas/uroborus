@@ -13,11 +13,12 @@ import (
 
 // Router router
 type Router struct {
-	config        *settings.Config
-	logger        *logging.ZapLogger
-	healthServer  *server.HealthServer
-	userServer    *server.UserServer
-	projectServer *server.ProjectServer
+	config          *settings.Config
+	logger          *logging.ZapLogger
+	healthServer    *server.HealthServer
+	userServer      *server.UserServer
+	projectServer   *server.ProjectServer
+	baseImageServer *server.BaseImageServer
 }
 
 // NewRouter Generator
@@ -27,13 +28,15 @@ func NewRouter(
 	healthServer *server.HealthServer,
 	userServer *server.UserServer,
 	projectServer *server.ProjectServer,
+	baseImageServer *server.BaseImageServer,
 ) *Router {
 	return &Router{
-		config:        config,
-		logger:        logger,
-		healthServer:  healthServer,
-		userServer:    userServer,
-		projectServer: projectServer,
+		config:          config,
+		logger:          logger,
+		healthServer:    healthServer,
+		userServer:      userServer,
+		projectServer:   projectServer,
+		baseImageServer: baseImageServer,
 	}
 }
 
@@ -78,6 +81,12 @@ func (r *Router) Server(middlewares ...gin.HandlerFunc) *gin.Engine {
 			projectRoute.Use(middleware.Auth())
 			projectRoute.PUT("", r.projectServer.Register)
 			projectRoute.POST("/checkout", r.projectServer.CheckOut)
+		}
+		{
+			baseImageRoute := app.Group(baseEngine.BasePath() + "/image")
+			baseImageRoute.Use(middleware.Auth())
+			baseImageRoute.PUT("", r.baseImageServer.Register)
+			baseImageRoute.GET("", r.baseImageServer.Get)
 		}
 	}
 	return app

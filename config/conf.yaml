@@ -9,3 +9,6 @@ postgres:
 
 user:
   rootPath: "./user/uroborus"
+
+registry:
+  url: "https://registry.hub.docker.com"

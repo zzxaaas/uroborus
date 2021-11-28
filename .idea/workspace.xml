@@ -4,9 +4,21 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="be6a63e6-c4f9-45d1-b782-d7d2ffb32b36" name="Default Changelist" comment="">
+    <list default="true" id="be6a63e6-c4f9-45d1-b782-d7d2ffb32b36" name="Default Changelist" comment="feat:git">
+      <change afterPath="$PROJECT_DIR$/model/base_image.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/server/base_image.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/service/base_image.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/store/base_image.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/service/git.go" beforeDir="false" afterPath="$PROJECT_DIR$/service/git.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmd/db/migrate.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/db/migrate.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/conf.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/conf.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/model/project.go" beforeDir="false" afterPath="$PROJECT_DIR$/model/project.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/router/router.go" beforeDir="false" afterPath="$PROJECT_DIR$/router/router.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/fx/fx.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/fx/fx.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/service/fx/fx.go" beforeDir="false" afterPath="$PROJECT_DIR$/service/fx/fx.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/store/fx/fx.go" beforeDir="false" afterPath="$PROJECT_DIR$/store/fx/fx.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -59,7 +71,7 @@
       <recent name="E:\Code\GoProjects\src\uroborus\server\doc" />
     </key>
   </component>
-  <component name="RunManager" selected="Go Build.go build uroborus/cmd">
+  <component name="RunManager" selected="Go Build.go build uroborus/cmd/db">
     <configuration name="go build uroborus/cmd" type="GoApplicationRunConfiguration" factoryName="Go Application" nameIsGenerated="true">
       <module name="uroborus" />
       <working_directory value="$PROJECT_DIR$" />
@@ -70,7 +82,7 @@
       <directory value="$PROJECT_DIR$/cmd" />
       <method v="2" />
     </configuration>
-    <configuration name="go build uroborus/cmd/db" type="GoApplicationRunConfiguration" factoryName="Go Application" nameIsGenerated="true">
+    <configuration name="go build uroborus/cmd/db" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
       <module name="uroborus" />
       <working_directory value="$PROJECT_DIR$" />
       <kind value="PACKAGE" />
@@ -79,6 +91,11 @@
       <directory value="$PROJECT_DIR$" />
       <method v="2" />
     </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Go Build.go build uroborus/cmd/db" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TypeScriptGeneratedFilesManager">
@@ -88,7 +105,8 @@
     <MESSAGE value="feat:init" />
     <MESSAGE value="feat:login &amp;&amp; register" />
     <MESSAGE value="feat:project" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat:project" />
+    <MESSAGE value="feat:git" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat:git" />
   </component>
   <component name="VgoProject">
     <integration-enabled>true</integration-enabled>
@@ -103,10 +121,10 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="414" y="174" width="1092" height="716" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1637250271067" />
-    <state x="409" y="33" key="CommitChangelistDialog2" timestamp="1637600465106">
+    <state x="409" y="33" key="CommitChangelistDialog2" timestamp="1637988726377">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="409" y="33" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1637600465106" />
+    <state x="409" y="33" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1637988726377" />
     <state width="723" height="466" key="DebuggerActiveHint" timestamp="1637685044929">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -119,46 +137,50 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="740" y="274" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1637480781095" />
-    <state width="1877" height="292" key="GridCell.Tab.0.bottom" timestamp="1637686146790">
+    <state width="1877" height="166" key="GridCell.Tab.0.bottom" timestamp="1638110607140">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="292" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1637686146790" />
-    <state width="1877" height="292" key="GridCell.Tab.0.center" timestamp="1637686146790">
+    <state width="1877" height="166" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1638110607140" />
+    <state width="1877" height="166" key="GridCell.Tab.0.center" timestamp="1638110607140">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="292" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1637686146790" />
-    <state width="1877" height="292" key="GridCell.Tab.0.left" timestamp="1637686146790">
+    <state width="1877" height="166" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1638110607140" />
+    <state width="1877" height="166" key="GridCell.Tab.0.left" timestamp="1638110607140">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="292" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1637686146790" />
-    <state width="1877" height="292" key="GridCell.Tab.0.right" timestamp="1637686146790">
+    <state width="1877" height="166" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1638110607140" />
+    <state width="1877" height="166" key="GridCell.Tab.0.right" timestamp="1638110607140">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="292" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1637686146790" />
-    <state width="1877" height="292" key="GridCell.Tab.1.bottom" timestamp="1637686146790">
+    <state width="1877" height="166" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1638110607140" />
+    <state width="1877" height="128" key="GridCell.Tab.1.bottom" timestamp="1638110607138">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="292" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1637686146790" />
-    <state width="1877" height="292" key="GridCell.Tab.1.center" timestamp="1637686146790">
+    <state width="1877" height="128" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1638110607138" />
+    <state width="1877" height="128" key="GridCell.Tab.1.center" timestamp="1638110607138">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="292" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1637686146790" />
-    <state width="1877" height="292" key="GridCell.Tab.1.left" timestamp="1637686146790">
+    <state width="1877" height="128" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1638110607138" />
+    <state width="1877" height="128" key="GridCell.Tab.1.left" timestamp="1638110607138">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="292" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1637686146790" />
-    <state width="1877" height="292" key="GridCell.Tab.1.right" timestamp="1637686146790">
+    <state width="1877" height="128" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1638110607138" />
+    <state width="1877" height="128" key="GridCell.Tab.1.right" timestamp="1638110607138">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="292" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1637686146790" />
+    <state width="1877" height="128" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1638110607138" />
     <state x="461" y="164" key="SettingsEditor" timestamp="1637476874366">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="461" y="164" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1637476874366" />
-    <state x="552" y="252" key="Vcs.Push.Dialog.v2" timestamp="1637600467936">
+    <state x="552" y="252" key="Vcs.Push.Dialog.v2" timestamp="1637988721757">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="552" y="252" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1637600467936" />
+    <state x="552" y="252" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1637988721757" />
+    <state width="968" height="528" key="XDebugger.FullValuePopup" timestamp="1638106547295">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="968" height="528" key="XDebugger.FullValuePopup/0.0.1920.1040@0.0.1920.1040" timestamp="1638106547295" />
     <state x="663" y="124" width="594" height="792" key="find.popup" timestamp="1637251912897">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
