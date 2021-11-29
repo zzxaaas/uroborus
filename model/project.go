@@ -1,5 +1,10 @@
 package model
 
+const (
+	RepoBasePath       = "/repo/"
+	DockerfileBasePath = "/dockerfile/"
+)
+
 type Project struct {
 	Model
 	Image      string `json:"image" form:"image"`
