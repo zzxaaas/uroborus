@@ -8,12 +8,12 @@ import (
 	"uroborus/service"
 )
 
-// HealthServer 健康检查
+// ProjectServer 健康检查
 type ProjectServer struct {
 	projectService *service.ProjectService
 }
 
-// NewHealthServer constructor
+// NewProjectServer -
 func NewProjectServer(projectService *service.ProjectService) *ProjectServer {
 	return &ProjectServer{
 		projectService: projectService,
