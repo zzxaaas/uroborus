@@ -7,6 +7,7 @@ import (
 	"go.uber.org/fx"
 	"net/http"
 	"time"
+	"uroborus/common"
 	"uroborus/common/logging"
 	settings "uroborus/common/setting"
 
@@ -53,6 +54,7 @@ func main() {
 			return context.Background()
 		}),
 		settings.Module,
+		common.Module,
 		fx.Provide(logging.NewZapLogger),
 		store.Module,
 		service.Module,

@@ -5,6 +5,7 @@ type BaseImage struct {
 	Name  string `json:"name" form:"name"`
 	Tags  string `json:"tags"`
 	Label string `json:"label" form:"label"`
+	Port  string `json:"port" form:"port"`
 }
 
 type BaseImageReq struct {

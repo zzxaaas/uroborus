@@ -81,6 +81,7 @@ func (r *Router) Server(middlewares ...gin.HandlerFunc) *gin.Engine {
 			projectRoute.Use(middleware.Auth())
 			projectRoute.PUT("", r.projectServer.Register)
 			projectRoute.POST("/checkout", r.projectServer.CheckOut)
+			projectRoute.POST("/build", r.projectServer.Build)
 		}
 		{
 			baseImageRoute := app.Group(baseEngine.BasePath() + "/image")

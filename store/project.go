@@ -20,7 +20,7 @@ func NewProjectStore(db *DB) *ProjectStore {
 func (s *ProjectStore) Save(body *model.Project) error {
 	return s.db.Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "name"}},
-		DoUpdates: clause.AssignmentColumns([]string{"branch", "bind_port", "command", "status", "updated_at"}),
+		DoUpdates: clause.AssignmentColumns([]string{"branch", "env", "container", "command", "status", "updated_at"}),
 	}).Create(&body).Error
 }
 

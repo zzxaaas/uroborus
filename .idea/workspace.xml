@@ -5,20 +5,25 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="be6a63e6-c4f9-45d1-b782-d7d2ffb32b36" name="Default Changelist" comment="feat:git">
-      <change afterPath="$PROJECT_DIR$/model/base_image.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/server/base_image.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/service/base_image.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/store/base_image.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/fx.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/model/container.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/server/container.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/service/container.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmd/db/migrate.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/db/migrate.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmd/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/docker.go" beforeDir="false" afterPath="$PROJECT_DIR$/common/docker.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/setting/fx.go" beforeDir="false" afterPath="$PROJECT_DIR$/common/setting/fx.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/config/conf.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/config/conf.yaml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/model/base_image.go" beforeDir="false" afterPath="$PROJECT_DIR$/model/base_image.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/model/project.go" beforeDir="false" afterPath="$PROJECT_DIR$/model/project.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/router/router.go" beforeDir="false" afterPath="$PROJECT_DIR$/router/router.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/fx/fx.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/fx/fx.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/project.go" beforeDir="false" afterPath="$PROJECT_DIR$/server/project.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/service/fx/fx.go" beforeDir="false" afterPath="$PROJECT_DIR$/service/fx/fx.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/store/fx/fx.go" beforeDir="false" afterPath="$PROJECT_DIR$/store/fx/fx.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/service/project.go" beforeDir="false" afterPath="$PROJECT_DIR$/service/project.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/store/base_image.go" beforeDir="false" afterPath="$PROJECT_DIR$/store/base_image.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/store/project.go" beforeDir="false" afterPath="$PROJECT_DIR$/store/project.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -53,25 +58,53 @@
     <property name="configurable.Project.GOPATH.is.expanded" value="true" />
     <property name="go.import.settings.migrated" value="true" />
     <property name="go.sdk.automatically.set" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/common" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/dockerfiles" />
+    <property name="restartRequiresConfirmation" value="false" />
     <property name="settings.editor.selected.configurable" value="org.jetbrains.plugins.github.ui.GithubSettingsConfigurable" />
   </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="E:\Code\GoProjects\src\uroborus\common" />
-      <recent name="E:\Code\GoProjects\src\uroborus\router\middleware" />
-      <recent name="E:\Code\GoProjects\src\uroborus\store" />
-      <recent name="E:\Code\GoProjects\src\uroborus\cmd" />
-      <recent name="E:\Code\GoProjects\src\uroborus\model" />
-    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="E:\Code\GoProjects\src\uroborus\store\fx" />
       <recent name="E:\Code\GoProjects\src\uroborus\service\fx" />
       <recent name="E:\Code\GoProjects\src\uroborus\server\fx" />
       <recent name="E:\Code\GoProjects\src\uroborus\server\doc" />
     </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="E:\Code\GoProjects\src\uroborus\dockerfiles" />
+      <recent name="E:\Code\GoProjects\src\uroborus\common" />
+      <recent name="E:\Code\GoProjects\src\uroborus\router\middleware" />
+      <recent name="E:\Code\GoProjects\src\uroborus\store" />
+      <recent name="E:\Code\GoProjects\src\uroborus\cmd" />
+    </key>
   </component>
-  <component name="RunManager" selected="Go Build.go build uroborus/cmd/db">
+  <component name="RunManager" selected="Go Build.go build uroborus/cmd">
+    <configuration name="go build docker.go" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
+      <module name="uroborus" />
+      <working_directory value="$PROJECT_DIR$" />
+      <kind value="FILE" />
+      <filePath value="$PROJECT_DIR$/common/docker.go" />
+      <package value="uroborus" />
+      <directory value="$PROJECT_DIR$" />
+      <method v="2" />
+    </configuration>
+    <configuration name="go build fx.go" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
+      <module name="uroborus" />
+      <working_directory value="$PROJECT_DIR$" />
+      <kind value="FILE" />
+      <filePath value="$PROJECT_DIR$/server/fx/fx.go" />
+      <package value="uroborus" />
+      <directory value="$PROJECT_DIR$" />
+      <method v="2" />
+    </configuration>
+    <configuration name="go build project.go" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
+      <module name="uroborus" />
+      <working_directory value="$PROJECT_DIR$" />
+      <kind value="FILE" />
+      <filePath value="$PROJECT_DIR$/service/project.go" />
+      <package value="uroborus" />
+      <directory value="$PROJECT_DIR$" />
+      <method v="2" />
+    </configuration>
     <configuration name="go build uroborus/cmd" type="GoApplicationRunConfiguration" factoryName="Go Application" nameIsGenerated="true">
       <module name="uroborus" />
       <working_directory value="$PROJECT_DIR$" />
@@ -94,6 +127,9 @@
     <recent_temporary>
       <list>
         <item itemvalue="Go Build.go build uroborus/cmd/db" />
+        <item itemvalue="Go Build.go build docker.go" />
+        <item itemvalue="Go Build.go build fx.go" />
+        <item itemvalue="Go Build.go build project.go" />
       </list>
     </recent_temporary>
   </component>
@@ -121,10 +157,10 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="414" y="174" width="1092" height="716" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1637250271067" />
-    <state x="409" y="33" key="CommitChangelistDialog2" timestamp="1637988726377">
+    <state x="409" y="33" key="CommitChangelistDialog2" timestamp="1638203761680">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="409" y="33" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1637988726377" />
+    <state x="409" y="33" key="CommitChangelistDialog2/0.0.1920.1040@0.0.1920.1040" timestamp="1638203761680" />
     <state width="723" height="466" key="DebuggerActiveHint" timestamp="1637685044929">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
@@ -137,57 +173,81 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="740" y="274" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1637480781095" />
-    <state width="1877" height="166" key="GridCell.Tab.0.bottom" timestamp="1638110607140">
+    <state width="1877" height="166" key="GridCell.Tab.0.bottom" timestamp="1638720183046">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="166" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1638110607140" />
-    <state width="1877" height="166" key="GridCell.Tab.0.center" timestamp="1638110607140">
+    <state width="1877" height="166" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1638720183046" />
+    <state width="1877" height="166" key="GridCell.Tab.0.center" timestamp="1638720183046">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="166" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1638110607140" />
-    <state width="1877" height="166" key="GridCell.Tab.0.left" timestamp="1638110607140">
+    <state width="1877" height="166" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1638720183046" />
+    <state width="1877" height="166" key="GridCell.Tab.0.left" timestamp="1638720183046">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="166" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1638110607140" />
-    <state width="1877" height="166" key="GridCell.Tab.0.right" timestamp="1638110607140">
+    <state width="1877" height="166" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1638720183046" />
+    <state width="1877" height="166" key="GridCell.Tab.0.right" timestamp="1638720183046">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="166" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1638110607140" />
-    <state width="1877" height="128" key="GridCell.Tab.1.bottom" timestamp="1638110607138">
+    <state width="1877" height="166" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1638720183046" />
+    <state width="1877" height="166" key="GridCell.Tab.1.bottom" timestamp="1638720192676">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="128" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1638110607138" />
-    <state width="1877" height="128" key="GridCell.Tab.1.center" timestamp="1638110607138">
+    <state width="1877" height="166" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1638720192676" />
+    <state width="1877" height="166" key="GridCell.Tab.1.center" timestamp="1638720192676">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="128" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1638110607138" />
-    <state width="1877" height="128" key="GridCell.Tab.1.left" timestamp="1638110607138">
+    <state width="1877" height="166" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1638720192676" />
+    <state width="1877" height="166" key="GridCell.Tab.1.left" timestamp="1638720192676">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="128" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1638110607138" />
-    <state width="1877" height="128" key="GridCell.Tab.1.right" timestamp="1638110607138">
+    <state width="1877" height="166" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1638720192676" />
+    <state width="1877" height="166" key="GridCell.Tab.1.right" timestamp="1638720192676">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1877" height="128" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1638110607138" />
-    <state x="461" y="164" key="SettingsEditor" timestamp="1637476874366">
+    <state width="1877" height="166" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1638720192676" />
+    <state x="461" y="164" key="SettingsEditor" timestamp="1638203357426">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="461" y="164" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1637476874366" />
-    <state x="552" y="252" key="Vcs.Push.Dialog.v2" timestamp="1637988721757">
+    <state x="461" y="164" key="SettingsEditor/0.0.1920.1040@0.0.1920.1040" timestamp="1638203357426" />
+    <state x="552" y="252" key="Vcs.Push.Dialog.v2" timestamp="1638203783751">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="552" y="252" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1637988721757" />
+    <state x="552" y="252" key="Vcs.Push.Dialog.v2/0.0.1920.1040@0.0.1920.1040" timestamp="1638203783751" />
     <state width="968" height="528" key="XDebugger.FullValuePopup" timestamp="1638106547295">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="968" height="528" key="XDebugger.FullValuePopup/0.0.1920.1040@0.0.1920.1040" timestamp="1638106547295" />
+    <state x="734" y="236" key="com.goide.refactor.move.GoMoveDeclarationDialog" timestamp="1638719877400">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="734" y="236" key="com.goide.refactor.move.GoMoveDeclarationDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1638719877399" />
+    <state x="763" y="432" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1638200921280">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="763" y="432" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1920.1040@0.0.1920.1040" timestamp="1638200921280" />
     <state x="663" y="124" width="594" height="792" key="find.popup" timestamp="1637251912897">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="663" y="124" width="594" height="792" key="find.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1637251912897" />
-    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup" timestamp="1637598518086">
+    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup" timestamp="1638710012719">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1637598518086" />
+    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1638710012719" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/../../pkg/mod/github.com/docker/go-connections@v0.4.0/nat/nat.go</url>
+          <line>112</line>
+          <option name="timeStamp" value="18" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/service/container.go</url>
+          <line>48</line>
+          <option name="timeStamp" value="20" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

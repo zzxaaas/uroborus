@@ -12,3 +12,5 @@ user:
 
 registry:
   url: "https://registry.hub.docker.com"
+docker:
+  host: "tcp://121.196.214.245:22375"

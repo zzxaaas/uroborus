@@ -8,8 +8,7 @@ const (
 type Project struct {
 	Model
 	Image      string `json:"image" form:"image"`
-	Tag        string `json:"tag" form:"tag"`
-	Port       int    `json:"port" form:"port"`
+	Port       string `json:"port" form:"port"`
 	BindPort   int    `json:"bind_port" form:"bind_port"`
 	RemoteRepo string `json:"remote_repo" form:"remote_repo"`
 	Branch     string `json:"branch" form:"branch"`
@@ -17,7 +16,14 @@ type Project struct {
 	Name       string `json:"name" form:"name"`
 	Version    string `json:"version" form:"version"`
 	Command    string `json:"command" form:"command"`
+	Env        string `json:"env"`
 	Container  string `json:"container" form:"container"`
 	Status     string `json:"status" form:"status"`
 	UserName   string `json:"user_name"`
+	Type       string `json:"type" form:"type"`
+}
+
+type RegisterProjectReq struct {
+	Project
+	Env []string `json:"env" form:"env"`
 }

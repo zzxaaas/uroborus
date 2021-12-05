@@ -21,7 +21,7 @@ func NewBaseImageStore(db *DB) *BaseImageStore {
 func (s BaseImageStore) Save(body model.BaseImage) error {
 	return s.db.Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "name"}},
-		DoUpdates: clause.AssignmentColumns([]string{"tags", "updated_at"}),
+		DoUpdates: clause.AssignmentColumns([]string{"tags", "port", "updated_at"}),
 	}).Create(&body).Error
 }
 

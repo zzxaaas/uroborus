@@ -11,4 +11,6 @@ var Module = fx.Options(
 	fx.Provide(NewProjectService),
 	fx.Provide(NewGitService),
 	fx.Provide(NewBaseImageService),
+	fx.Provide(NewDockerService),
+	fx.Provide(NewContainerService),
 )
