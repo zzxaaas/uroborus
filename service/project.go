@@ -157,6 +157,17 @@ func (s ProjectService) Build(req model.Project) error {
 		return err
 	}
 
+	if req.Type == "project" {
+		if err := s.containerService.BuildImage(model.BuildImageOption{
+			Path:       req.LocalRepo,
+			Dockerfile: "Dockerfile",
+			Tag:        req.Name,
+			Version:    req.Version,
+		}); err != nil {
+			return err
+		}
+	}
+
 	if req.Container != "" {
 		if err := s.containerService.RemoveContainer(req.Container); err != nil {
 			return err
