@@ -7,9 +7,7 @@ postgres:
   passwd: "root"
   batchSize: 3000
 
-user:
-  rootPath: "./user/uroborus"
-
+root: "./user/uroborus"
 registry:
   url: "https://registry.hub.docker.com"
 docker:

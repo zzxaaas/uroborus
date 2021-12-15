@@ -9,7 +9,6 @@ import (
 	"github.com/docker/go-connections/nat"
 	"github.com/jhoonb/archivex"
 	"io"
-	"io/ioutil"
 	"os"
 	"uroborus/model"
 )
@@ -24,62 +23,30 @@ func NewContainerService(cli *client.Client) *ContainerService {
 	}
 }
 
-//func createDockerTarFile(dockerfile string) (io.Reader, error) {
-//
-//	var buf bytes.Buffer
-//	tw := tar.NewWriter(&buf)
-//	f, err := os.Open(dockerfile)
-//	if err != nil {
-//		println(dockerfile)
-//		return nil, err
-//	}
-//	defer f.Close()
-//
-//	body, err := ioutil.ReadAll(f)
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	hdr := &tar.Header{
-//		Name: f.Name(),
-//		Mode: 0600,
-//		Size: int64(len(body)),
-//	}
-//
-//	tw.WriteHeader(hdr)
-//	_,err = tw.Write(body)
-//	if err != nil {
-//		return nil, err
-//	}
-//	return &buf, nil
-//}
-
 func (s ContainerService) BuildImage(opt model.BuildImageOption) error {
 	ctx := context.Background()
-	//dockerBuildContext, err := createDockerTarFile(opt.Path + opt.Dockerfile)
-	//if err != nil {
-	//	return err
-	//}
 
 	tar := new(archivex.TarFile)
-	tar.Create(opt.Path)
-	tar.AddAll(opt.Path, false)
+	tar.Create(opt.Path[:len(opt.Path)-1] + ".tar")
+	tar.AddAll(opt.Path[:len(opt.Path)-1], false)
 	tar.Close()
-	dockerBuildContext, err := os.Open(opt.Path + ".tar")
+	dockerBuildContext, err := os.Open(opt.Path[:len(opt.Path)-1] + ".tar")
 	defer dockerBuildContext.Close()
 	resp, err := s.cli.ImageBuild(ctx, dockerBuildContext, types.ImageBuildOptions{
-		Target:     opt.Tag,
+		Tags:       []string{opt.Tag},
 		Version:    types.BuilderVersion(opt.Version),
-		Dockerfile: opt.Path + opt.Dockerfile,
+		Dockerfile: opt.Dockerfile,
 	})
 	if err != nil {
 		return err
 	}
-	response, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
-	fmt.Println(response)
+	defer resp.Body.Close()
+	io.Copy(os.Stdout, resp.Body)
+	//response, err := ioutil.ReadAll(resp.Body)
+	//if err != nil {
+	//	return err
+	//}
+	//fmt.Println(string(response))
 	return nil
 }
 

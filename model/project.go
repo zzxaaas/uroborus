@@ -2,7 +2,7 @@ package model
 
 const (
 	RepoBasePath       = "/repo/"
-	DockerfileBasePath = "/dockerfile/"
+	DockerfileBasePath = "/Dockerfile/"
 )
 
 type Project struct {
@@ -20,6 +20,7 @@ type Project struct {
 	Container  string `json:"container" form:"container"`
 	Status     string `json:"status" form:"status"`
 	UserName   string `json:"user_name"`
+	Dockerfile string `json:"dockerfile" form:"dockerfile"`
 	Type       string `json:"type" form:"type"`
 }
 

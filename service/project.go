@@ -113,7 +113,8 @@ func (s ProjectService) getImagePort(name string) (string, error) {
 }
 
 func (s ProjectService) initProjectPath(project *model.Project) error {
-	basePath := fmt.Sprintf("%s/%s/%s", viper.GetString("user.rootPath"), project.UserName, project.Name)
+	root := viper.GetString("root")
+	basePath := fmt.Sprintf("%s/%s/%s", root, project.UserName, project.Name)
 
 	project.LocalRepo = basePath + model.RepoBasePath
 	dockerfilePath := basePath + model.DockerfileBasePath
@@ -160,7 +161,7 @@ func (s ProjectService) Build(req model.Project) error {
 	if req.Type == "project" {
 		if err := s.containerService.BuildImage(model.BuildImageOption{
 			Path:       req.LocalRepo,
-			Dockerfile: "Dockerfile",
+			Dockerfile: req.Dockerfile,
 			Tag:        req.Name,
 			Version:    req.Version,
 		}); err != nil {
