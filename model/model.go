@@ -1,15 +1,16 @@
 package model
 
 import (
+	"gorm.io/gorm"
 	"time"
 )
 
 // Model Customized gorm.Model
 type Model struct {
-	ID        uint       `json:"id" gorm:"primary_key"`
-	CreatedAt time.Time  `json:"created_at" gorm:"index"`
-	UpdatedAt time.Time  `json:"updated_at"`
-	DeletedAt *time.Time `json:"-" sql:"index"`
+	ID        uint            `json:"id" gorm:"primary_key"`
+	CreatedAt time.Time       `json:"created_at" gorm:"index"`
+	UpdatedAt time.Time       `json:"updated_at"`
+	DeletedAt *gorm.DeletedAt `json:"-" sql:"index"`
 }
 
 // PaginationQuery 更新信息查询

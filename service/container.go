@@ -34,7 +34,6 @@ func (s ContainerService) BuildImage(opt model.BuildImageOption) error {
 	defer dockerBuildContext.Close()
 	resp, err := s.cli.ImageBuild(ctx, dockerBuildContext, types.ImageBuildOptions{
 		Tags:       []string{opt.Tag},
-		Version:    types.BuilderVersion(opt.Version),
 		Dockerfile: opt.Dockerfile,
 	})
 	if err != nil {
@@ -58,22 +57,29 @@ func (s ContainerService) RemoveContainer(contianerID string) error {
 
 func (s ContainerService) StartContainerWithOption(opt model.ContainerOption) (string, error) {
 	ctx := context.Background()
-
-	out, err := s.cli.ImagePull(ctx, opt.Image, types.ImagePullOptions{})
-	if err != nil {
-		return "", err
+	fmt.Println(opt)
+	if opt.NeedPull {
+		out, err := s.cli.ImagePull(ctx, opt.Image, types.ImagePullOptions{})
+		if err != nil {
+			return "", err
+		}
+		defer out.Close()
+		io.Copy(os.Stdout, out)
 	}
-	defer out.Close()
-	io.Copy(os.Stdout, out)
 
 	_, portMap, err := nat.ParsePortSpecs([]string{fmt.Sprintf("%s:%s", opt.Port, opt.ProtoPort)})
 	if err != nil {
 		return "", err
 	}
-	resp, err := s.cli.ContainerCreate(ctx, &container.Config{
+
+	ctrConfig := container.Config{
 		Image: opt.Image,
-		Env:   opt.Env,
-	}, &container.HostConfig{
+	}
+	if len(opt.Env) > 0 && opt.Env[0] != "" {
+		ctrConfig.Env = opt.Env
+	}
+
+	resp, err := s.cli.ContainerCreate(ctx, &ctrConfig, &container.HostConfig{
 		PortBindings: portMap,
 	}, nil, nil, opt.Name)
 	if err != nil {

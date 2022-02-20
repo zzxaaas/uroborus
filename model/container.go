@@ -15,4 +15,5 @@ type ContainerOption struct {
 	// 容器内
 	ProtoPort string
 	Env       []string
+	NeedPull  bool
 }

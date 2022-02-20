@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"uroborus/common/auth"
@@ -20,6 +21,21 @@ func NewProjectServer(projectService *service.ProjectService) *ProjectServer {
 	}
 }
 
+func (s ProjectServer) Get(c *gin.Context) {
+	req := model.Project{}
+	if err := c.ShouldBindQuery(&req); err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+	req.UserName = c.GetString(auth.IDTokenSubjectContextKey)
+	if resp, err := s.projectService.Find(req); err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	} else {
+		c.JSON(http.StatusOK, resp)
+	}
+}
+
 func (s ProjectServer) Register(c *gin.Context) {
 	req := model.RegisterProjectReq{}
 	if err := c.ShouldBind(&req); err != nil {
@@ -31,7 +47,21 @@ func (s ProjectServer) Register(c *gin.Context) {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "success"})
+	c.JSON(http.StatusOK, gin.H{"id": req.ID})
+}
+
+func (s ProjectServer) Delete(c *gin.Context) {
+	req := model.Project{}
+	if err := c.ShouldBind(&req); err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+	req.UserName = c.GetString(auth.IDTokenSubjectContextKey)
+	if err := s.projectService.Delete(&req); err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "ok"})
 }
 
 func (s ProjectServer) Build(c *gin.Context) {
@@ -41,11 +71,12 @@ func (s ProjectServer) Build(c *gin.Context) {
 		return
 	}
 	req.UserName = c.GetString(auth.IDTokenSubjectContextKey)
-	if err := s.projectService.Build(req); err != nil {
+	if err := s.projectService.Build(&req); err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"message": "success"})
+	url := fmt.Sprintf("http://121.196.214.245:%d", req.BindPort)
+	c.JSON(http.StatusOK, gin.H{"message": "success", "url": url})
 }
 
 func (s ProjectServer) CheckOut(c *gin.Context) {

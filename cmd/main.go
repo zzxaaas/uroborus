@@ -41,7 +41,7 @@ func ServiceLifetimeHooks(lc fx.Lifecycle, srv *http.Server, logger *logging.Zap
 }
 
 func main() {
-	port := flag.String("p", "8082", "port to listen on")
+	port := flag.String("p", "8080", "port to listen on")
 	flag.Parse()
 	app := fx.New(
 		fx.Provide(fx.Annotated{

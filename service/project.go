@@ -43,11 +43,14 @@ func (s ProjectService) Save(req *model.RegisterProjectReq) error {
 	if req.Env != nil {
 		req.Project.Env = strings.Join(req.Env, ",")
 	}
+	if req.Cmd != nil {
+		req.Project.Command = strings.Join(req.Cmd, ",")
+	}
 
 	imageName := strings.Split(req.Image, ":")[0]
 	if port, err := s.getImagePort(imageName); err != nil {
 		return err
-	} else {
+	} else if port != "" {
 		req.Port = port
 	}
 
@@ -71,6 +74,10 @@ func (s ProjectService) Save(req *model.RegisterProjectReq) error {
 	}
 
 	return s.projectStore.Save(&req.Project)
+}
+
+func (s ProjectService) Delete(req *model.Project) error {
+	return s.projectStore.Delete(req)
 }
 
 func (s ProjectService) generatePort(project *model.Project) error {
@@ -128,10 +135,6 @@ func (s ProjectService) initProjectPath(project *model.Project) error {
 	return nil
 }
 
-func (s ProjectService) prepareDockerfile() {
-
-}
-
 func (s ProjectService) CheckOut(req *model.Project) error {
 	if err := s.projectStore.Update(req); err != nil {
 		return err
@@ -140,6 +143,10 @@ func (s ProjectService) CheckOut(req *model.Project) error {
 		return err
 	}
 	return s.gitService.Checkout(req.LocalRepo, req.Branch, req.RemoteRepo)
+}
+
+func (s ProjectService) Find(project model.Project) ([]model.Project, error) {
+	return s.projectStore.Find(project)
 }
 
 func (s ProjectService) Get(project *model.Project) (bool, error) {
@@ -153,20 +160,28 @@ func (s ProjectService) Get(project *model.Project) (bool, error) {
 	return true, nil
 }
 
-func (s ProjectService) Build(req model.Project) error {
-	if err := s.projectStore.Get(&req); err != nil {
+func (s ProjectService) Build(req *model.Project) error {
+	if err := s.projectStore.Get(req); err != nil {
 		return err
 	}
-
+	needPull := true
 	if req.Type == "project" {
 		if err := s.containerService.BuildImage(model.BuildImageOption{
 			Path:       req.LocalRepo,
 			Dockerfile: req.Dockerfile,
-			Tag:        req.Name,
-			Version:    req.Version,
+			Tag:        req.Name + ":" + req.Version,
 		}); err != nil {
 			return err
 		}
+		req.Image = fmt.Sprintf("%s:%s", req.Name, "latest")
+		needPull = false
+	}
+	if err := s.projectStore.Save(req); err != nil {
+		return err
+	}
+
+	if req.Image == "" {
+		return errors.New("镜像不存在")
 	}
 
 	if req.Container != "" {
@@ -181,12 +196,14 @@ func (s ProjectService) Build(req model.Project) error {
 		ProtoPort: req.Port,
 		Port:      strconv.Itoa(req.BindPort),
 		Env:       strings.Split(req.Env, ","),
+		NeedPull:  needPull,
 	}); err != nil {
 		return err
 	} else {
 		req.Container = id
 	}
-	if err := s.projectStore.Save(&req); err != nil {
+
+	if err := s.projectStore.Save(req); err != nil {
 		return err
 	}
 	return nil

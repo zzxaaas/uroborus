@@ -79,7 +79,9 @@ func (r *Router) Server(middlewares ...gin.HandlerFunc) *gin.Engine {
 		{
 			projectRoute := app.Group(baseEngine.BasePath() + "/project")
 			projectRoute.Use(middleware.Auth())
+			projectRoute.GET("", r.projectServer.Get)
 			projectRoute.PUT("", r.projectServer.Register)
+			projectRoute.DELETE("", r.projectServer.Delete)
 			projectRoute.POST("/checkout", r.projectServer.CheckOut)
 			projectRoute.POST("/build", r.projectServer.Build)
 		}

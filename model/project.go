@@ -27,4 +27,5 @@ type Project struct {
 type RegisterProjectReq struct {
 	Project
 	Env []string `json:"env" form:"env"`
+	Cmd []string `json:"cmd" form:"cmd"`
 }
