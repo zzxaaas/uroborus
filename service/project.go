@@ -10,29 +10,26 @@ import (
 	"gorm.io/gorm"
 	"math/rand"
 	"os"
-	"strconv"
 	"strings"
 	"uroborus/model"
 	"uroborus/store"
 )
 
 type ProjectService struct {
-	projectStore     *store.ProjectStore
-	gitService       *GitService
-	imageService     *BaseImageService
-	containerService *ContainerService
+	projectStore *store.ProjectStore
+	imageService *BaseImageService
+	gitService   *GitService
 }
 
 func NewProjectService(
 	projectStore *store.ProjectStore,
-	gitService *GitService,
 	imageService *BaseImageService,
-	containerService *ContainerService) *ProjectService {
+	gitService *GitService,
+) *ProjectService {
 	return &ProjectService{
-		projectStore:     projectStore,
-		gitService:       gitService,
-		imageService:     imageService,
-		containerService: containerService,
+		projectStore: projectStore,
+		imageService: imageService,
+		gitService:   gitService,
 	}
 }
 
@@ -66,7 +63,9 @@ func (s ProjectService) Save(req *model.RegisterProjectReq) error {
 			if err := s.initProjectPath(&req.Project); err != nil {
 				return err
 			}
-			go s.cloneFromGit(req.Project)
+			if err := s.clone(&req.Project); err != nil {
+				return err
+			}
 		}
 		if err := s.generatePort(&req.Project); err != nil {
 			return err
@@ -78,6 +77,9 @@ func (s ProjectService) Save(req *model.RegisterProjectReq) error {
 
 func (s ProjectService) Delete(req *model.Project) error {
 	return s.projectStore.Delete(req)
+}
+func (s ProjectService) Update(req *model.Project) error {
+	return s.projectStore.Update(req)
 }
 
 func (s ProjectService) generatePort(project *model.Project) error {
@@ -96,16 +98,6 @@ func (s ProjectService) generatePort(project *model.Project) error {
 	return nil
 }
 
-func (s ProjectService) cloneFromGit(project model.Project) {
-	if err := s.gitService.Clone(project.LocalRepo, false, &git.CloneOptions{
-		URL:               project.RemoteRepo,
-		ReferenceName:     plumbing.NewBranchReferenceName(project.Branch),
-		RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
-	}); err != nil {
-		logrus.Error(err)
-	}
-}
-
 func (s ProjectService) getImagePort(name string) (string, error) {
 	resp, err := s.imageService.Get(model.BaseImage{
 		Name: name,
@@ -121,7 +113,7 @@ func (s ProjectService) getImagePort(name string) (string, error) {
 
 func (s ProjectService) initProjectPath(project *model.Project) error {
 	root := viper.GetString("root")
-	basePath := fmt.Sprintf("%s/%s/%s", root, project.UserName, project.Name)
+	basePath := fmt.Sprintf("%s/%s/%s/%s", root, project.UserName, project.Branch, project.Name)
 
 	project.LocalRepo = basePath + model.RepoBasePath
 	dockerfilePath := basePath + model.DockerfileBasePath
@@ -135,18 +127,30 @@ func (s ProjectService) initProjectPath(project *model.Project) error {
 	return nil
 }
 
-func (s ProjectService) CheckOut(req *model.Project) error {
-	if err := s.projectStore.Update(req); err != nil {
-		return err
-	}
-	if _, err := s.Get(req); err != nil {
-		return err
-	}
-	return s.gitService.Checkout(req.LocalRepo, req.Branch, req.RemoteRepo)
-}
+//func (s ProjectService) CheckOut(req *model.Project) error {
+//	if err := s.projectStore.Update(req); err != nil {
+//		return err
+//	}
+//	if _, err := s.Get(req); err != nil {
+//		return err
+//	}
+//	return s.gitService.Checkout(req.LocalRepo, req.Branch, req.RemoteRepo)
+//}
 
 func (s ProjectService) Find(project model.Project) ([]model.Project, error) {
 	return s.projectStore.Find(project)
+}
+
+func (s ProjectService) clone(project *model.Project) error {
+	if err := s.gitService.Clone(project.LocalRepo, false, &git.CloneOptions{
+		URL:               project.RemoteRepo,
+		ReferenceName:     plumbing.NewBranchReferenceName(project.Branch),
+		RecurseSubmodules: git.DefaultSubmoduleRecursionDepth,
+	}); err != nil {
+		logrus.Error(err)
+		return err
+	}
+	return nil
 }
 
 func (s ProjectService) Get(project *model.Project) (bool, error) {
@@ -158,53 +162,4 @@ func (s ProjectService) Get(project *model.Project) (bool, error) {
 		return false, err
 	}
 	return true, nil
-}
-
-func (s ProjectService) Build(req *model.Project) error {
-	if err := s.projectStore.Get(req); err != nil {
-		return err
-	}
-	needPull := true
-	if req.Type == "project" {
-		if err := s.containerService.BuildImage(model.BuildImageOption{
-			Path:       req.LocalRepo,
-			Dockerfile: req.Dockerfile,
-			Tag:        req.Name + ":" + req.Version,
-		}); err != nil {
-			return err
-		}
-		req.Image = fmt.Sprintf("%s:%s", req.Name, "latest")
-		needPull = false
-	}
-	if err := s.projectStore.Save(req); err != nil {
-		return err
-	}
-
-	if req.Image == "" {
-		return errors.New("镜像不存在")
-	}
-
-	if req.Container != "" {
-		if err := s.containerService.RemoveContainer(req.Container); err != nil {
-			return err
-		}
-	}
-
-	if id, err := s.containerService.StartContainerWithOption(model.ContainerOption{
-		Name:      req.Name,
-		Image:     req.Image,
-		ProtoPort: req.Port,
-		Port:      strconv.Itoa(req.BindPort),
-		Env:       strings.Split(req.Env, ","),
-		NeedPull:  needPull,
-	}); err != nil {
-		return err
-	} else {
-		req.Container = id
-	}
-
-	if err := s.projectStore.Save(req); err != nil {
-		return err
-	}
-	return nil
 }

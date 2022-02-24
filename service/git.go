@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 )
@@ -25,6 +26,19 @@ func (s GitService) Clone(directory string, isBare bool, options *git.CloneOptio
 	}
 	_, err = r.CommitObject(ref.Hash())
 	return err
+}
+
+func (s GitService) Pull(directory string) error {
+	r, err := git.PlainOpen(directory)
+	if err != nil && err != git.ErrRepositoryAlreadyExists {
+		return err
+	}
+	w, err := r.Worktree()
+	err = w.Pull(&git.PullOptions{RemoteName: "origin"})
+	if err != nil && !errors.Is(err, git.NoErrAlreadyUpToDate) {
+		return err
+	}
+	return nil
 }
 
 func (s GitService) Checkout(directory, branch, url string) error {

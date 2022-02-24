@@ -2,6 +2,7 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/user/uroborus/aaa/aaa-test/repo" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/user/uroborus/zzxaaas/go-build-test/repo" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/user/uroborus/zzxaaas123/test-123/repo" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/user/uroboruszzxaaas/go-test-gitee" vcs="Git" />

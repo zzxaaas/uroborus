@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"uroborus/common/auth"
@@ -64,31 +63,16 @@ func (s ProjectServer) Delete(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "ok"})
 }
 
-func (s ProjectServer) Build(c *gin.Context) {
-	req := model.Project{}
-	if err := c.ShouldBind(&req); err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
-		return
-	}
-	req.UserName = c.GetString(auth.IDTokenSubjectContextKey)
-	if err := s.projectService.Build(&req); err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-	url := fmt.Sprintf("http://121.196.214.245:%d", req.BindPort)
-	c.JSON(http.StatusOK, gin.H{"message": "success", "url": url})
-}
-
-func (s ProjectServer) CheckOut(c *gin.Context) {
-	req := model.Project{}
-	if err := c.ShouldBind(&req); err != nil {
-		c.AbortWithError(http.StatusBadRequest, err)
-		return
-	}
-	req.UserName = c.GetString(auth.IDTokenSubjectContextKey)
-	if err := s.projectService.CheckOut(&req); err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"message": "success"})
-}
+//func (s ProjectServer) CheckOut(c *gin.Context) {
+//	req := model.Project{}
+//	if err := c.ShouldBind(&req); err != nil {
+//		c.AbortWithError(http.StatusBadRequest, err)
+//		return
+//	}
+//	req.UserName = c.GetString(auth.IDTokenSubjectContextKey)
+//	if err := s.projectService.CheckOut(&req); err != nil {
+//		c.AbortWithError(http.StatusInternalServerError, err)
+//		return
+//	}
+//	c.JSON(http.StatusOK, gin.H{"message": "success"})
+//}

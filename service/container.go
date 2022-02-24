@@ -33,9 +33,9 @@ func (s ContainerService) BuildImage(opt model.BuildImageOption) error {
 	dockerBuildContext, err := os.Open(opt.Path[:len(opt.Path)-1] + ".tar")
 	defer dockerBuildContext.Close()
 	resp, err := s.cli.ImageBuild(ctx, dockerBuildContext, types.ImageBuildOptions{
-		Tags:       []string{opt.Tag},
-		Dockerfile: opt.Dockerfile,
+		Tags: []string{opt.Tag},
 	})
+
 	if err != nil {
 		return err
 	}

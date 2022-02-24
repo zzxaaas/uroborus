@@ -32,6 +32,7 @@ func main() {
 		&model.User{},
 		&model.Project{},
 		&model.BaseImage{},
+		&model.DeployHistory{},
 	}
 	if *shouldDrop {
 		if err := db.Migrator().DropTable(models...); err != nil {

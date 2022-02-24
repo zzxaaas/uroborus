@@ -11,6 +11,7 @@ type Project struct {
 	Port       string `json:"port" form:"port"`
 	BindPort   int    `json:"bind_port" form:"bind_port"`
 	RemoteRepo string `json:"remote_repo" form:"remote_repo"`
+	AccessUrl  string `json:"access_url" form:"access_url"`
 	Branch     string `json:"branch" form:"branch"`
 	LocalRepo  string `json:"local_repo" form:"local_repo"`
 	Name       string `json:"name" form:"name"`
