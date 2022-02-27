@@ -3,6 +3,7 @@ package model
 const (
 	RepoBasePath       = "/repo/"
 	DockerfileBasePath = "/Dockerfile/"
+	LogfileBasePath    = "/log/"
 )
 
 type Project struct {

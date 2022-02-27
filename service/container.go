@@ -1,25 +1,40 @@
 package service
 
 import (
+	"bufio"
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
+	"github.com/gorilla/websocket"
 	"github.com/jhoonb/archivex"
+	"github.com/sirupsen/logrus"
 	"io"
+	"net/http"
 	"os"
+	"strconv"
+	"uroborus/common/kafka"
 	"uroborus/model"
 )
 
 type ContainerService struct {
-	cli *client.Client
+	cli      *client.Client
+	kafkaCli *kafka.Client
+	upGrader websocket.Upgrader
 }
 
-func NewContainerService(cli *client.Client) *ContainerService {
+func NewContainerService(cli *client.Client, kafkaCli *kafka.Client) *ContainerService {
 	return &ContainerService{
-		cli: cli,
+		cli:      cli,
+		kafkaCli: kafkaCli,
+		upGrader: websocket.Upgrader{
+			CheckOrigin: func(r *http.Request) bool {
+				return true
+			},
+		},
 	}
 }
 
@@ -40,13 +55,32 @@ func (s ContainerService) BuildImage(opt model.BuildImageOption) error {
 		return err
 	}
 	defer resp.Body.Close()
-	io.Copy(os.Stdout, resp.Body)
-	//response, err := ioutil.ReadAll(resp.Body)
-	//if err != nil {
-	//	return err
+	s.ReaderToKafka(resp.Body, int(opt.DeployID), model.DEPLOY_STEP_BUILD)
+	//r := bufio.NewReader(resp.Body)
+	//for {
+	//	//循环从reader中根据换行符读取并转换为string
+	//	log, err := r.ReadString('\n')
+	//	if err != nil {
+	//		logrus.Error(err)
+	//		break
+	//	}
+	//	s.kafkaCli.SendLog(kafka.PackMsg(strconv.Itoa(int(opt.DeployID)),log,model.DEPLOY_STEP_BUILD))
 	//}
-	//fmt.Println(string(response))
+
 	return nil
+}
+
+func (s ContainerService) GetContainerLog(contianerID string) (io.Reader, error) {
+	logs, err := s.cli.ContainerLogs(context.Background(), contianerID, types.ContainerLogsOptions{
+		ShowStdout: true,
+		ShowStderr: true,
+		Follow:     true,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return logs, nil
 }
 
 func (s ContainerService) RemoveContainer(contianerID string) error {
@@ -57,14 +91,23 @@ func (s ContainerService) RemoveContainer(contianerID string) error {
 
 func (s ContainerService) StartContainerWithOption(opt model.ContainerOption) (string, error) {
 	ctx := context.Background()
-	fmt.Println(opt)
 	if opt.NeedPull {
 		out, err := s.cli.ImagePull(ctx, opt.Image, types.ImagePullOptions{})
 		if err != nil {
 			return "", err
 		}
 		defer out.Close()
-		io.Copy(os.Stdout, out)
+		s.ReaderToKafka(out, int(opt.DeployID), model.DEPLOY_STEP_BUILD)
+		//r := bufio.NewReader(out)
+		//for {
+		//	log, err := r.ReadString('\n')
+		//	if err != nil {
+		//		logrus.Error(err)
+		//		break
+		//	}
+		//	s.kafkaCli.SendLog(kafka.PackMsg(strconv.Itoa(int(opt.DeployID)),log,model.DEPLOY_STEP_BUILD))
+		//}
+
 	}
 
 	_, portMap, err := nat.ParsePortSpecs([]string{fmt.Sprintf("%s:%s", opt.Port, opt.ProtoPort)})
@@ -78,16 +121,36 @@ func (s ContainerService) StartContainerWithOption(opt model.ContainerOption) (s
 	if len(opt.Env) > 0 && opt.Env[0] != "" {
 		ctrConfig.Env = opt.Env
 	}
-
+	topic := strconv.Itoa(int(opt.DeployID))
 	resp, err := s.cli.ContainerCreate(ctx, &ctrConfig, &container.HostConfig{
 		PortBindings: portMap,
 	}, nil, nil, opt.Name)
 	if err != nil {
+		s.sendMessage(topic, err.Error(), model.DEPLOY_STEP_RUN)
 		return "", err
 	}
-
+	s.sendMessage(topic, fmt.Sprintf("create container {%s} success", resp.ID), model.DEPLOY_STEP_RUN)
 	if err := s.cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
 		return "", err
 	}
+	s.sendMessage(topic, "start container success", model.DEPLOY_STEP_RUN)
 	return resp.ID, nil
+}
+
+func (s ContainerService) sendMessage(topic, message string, key int32) {
+	s.kafkaCli.SendLog(kafka.PackMsg(topic, message, key))
+}
+
+func (s ContainerService) ReaderToKafka(reader io.Reader, deployID, step int) {
+	r := bufio.NewReader(reader)
+	for {
+		log, err := r.ReadString('\n')
+		if err != nil {
+			logrus.Error(err)
+			break
+		}
+		stream := model.LogStream{}
+		json.Unmarshal([]byte(log), &stream)
+		s.sendMessage(strconv.Itoa(deployID), stream.Stream, int32(step))
+	}
 }

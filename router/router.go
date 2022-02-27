@@ -88,6 +88,7 @@ func (r *Router) Server(middlewares ...gin.HandlerFunc) *gin.Engine {
 		}
 		{
 			deployRoute := app.Group(baseEngine.BasePath() + "/deploy")
+			deployRoute.GET("/log/ws", r.deployServer.Log)
 			deployRoute.Use(middleware.Auth())
 			deployRoute.GET("", r.deployServer.Get)
 			deployRoute.POST("", r.deployServer.Deploy)

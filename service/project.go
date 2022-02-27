@@ -71,7 +71,8 @@ func (s ProjectService) Save(req *model.RegisterProjectReq) error {
 			return err
 		}
 	}
-
+	//project.AccessUrl = fmt.Sprintf("http://%s-%s.%s:%d",project.Branch,project.UserName,viper.GetString("baseUrl"),project.BindPort)
+	req.Project.AccessUrl = fmt.Sprintf("http://121.196.214.245:%d", req.Project.BindPort)
 	return s.projectStore.Save(&req.Project)
 }
 
@@ -117,8 +118,8 @@ func (s ProjectService) initProjectPath(project *model.Project) error {
 
 	project.LocalRepo = basePath + model.RepoBasePath
 	dockerfilePath := basePath + model.DockerfileBasePath
-
-	for _, path := range []string{project.LocalRepo, dockerfilePath} {
+	logPath := basePath + model.LogfileBasePath
+	for _, path := range []string{project.LocalRepo, dockerfilePath, logPath} {
 		if err := os.MkdirAll(path, os.ModePerm); err != nil {
 			return err
 		}

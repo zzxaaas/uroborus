@@ -29,7 +29,7 @@ func (s *DeployHistoryStore) Delete(body *model.DeployHistory) error {
 }
 
 func (s *DeployHistoryStore) Get(body *model.DeployHistory) error {
-	return s.db.First(&body, body).Error
+	return s.db.Order("id desc").First(&body, body).Error
 }
 
 func (s *DeployHistoryStore) Find(body *model.DeployHistory) ([]model.DeployHistory, error) {

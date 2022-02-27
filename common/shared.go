@@ -1,7 +1,10 @@
 package common
 
 import (
+	"bytes"
+	"encoding/binary"
 	"fmt"
+	"os"
 	"reflect"
 	"strconv"
 	"strings"
@@ -227,4 +230,22 @@ func GetFirstDateOfWeek() (weekMonday time.Time) {
 
 	weekMonday = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local).AddDate(0, 0, offset)
 	return
+}
+
+func PathExists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
+}
+
+func BytesToInt(bys []byte) int {
+	bytebuff := bytes.NewBuffer(bys)
+	var data int64
+	binary.Read(bytebuff, binary.BigEndian, &data)
+	return int(data)
 }

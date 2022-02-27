@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
@@ -8,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"uroborus/common/kafka"
 	"uroborus/model"
 )
 
@@ -16,59 +18,94 @@ type DeployService struct {
 	projectService       *ProjectService
 	gitService           *GitService
 	containerService     *ContainerService
+	kafkaCli             *kafka.Client
 }
 
-func NewDeployService(deployHistoryService *DeployHistoryService, projectService *ProjectService, gitService *GitService, containerService *ContainerService) *DeployService {
+func NewDeployService(deployHistoryService *DeployHistoryService, projectService *ProjectService, gitService *GitService, containerService *ContainerService, kafkaCli *kafka.Client) *DeployService {
 	return &DeployService{
 		deployHistoryService: deployHistoryService,
 		projectService:       projectService,
 		gitService:           gitService,
 		containerService:     containerService,
+		kafkaCli:             kafkaCli,
 	}
 }
 
 func (s DeployService) Deploy(body *model.DeployHistory) error {
-
 	project := &model.Project{Model: model.Model{ID: body.Origin_ID}}
 	if _, err := s.projectService.Get(project); err != nil {
 		return err
 	}
-	now := time.Now()
-	body.Image = fmt.Sprintf("%s:%s-%s", project.Name, project.Branch, now.Format("20060102.1504"))
+	body.CreatedAt = time.Now()
+	body.Image = fmt.Sprintf("%s:%s-%s", project.Name, project.Branch, body.CreatedAt.Format("20060102.1504"))
 	body.Status = model.DEPLOY_STATUS_RUNING
 	if err := s.deployHistoryService.CreateDeploy(body); err != nil {
 		return err
 	}
+	if err := s.kafkaCli.CreateTopic(strconv.Itoa(int(body.ID))); err != nil {
+		return err
+	}
+	go s.doDeploy(project, body)
+	return nil
+}
 
+func (s DeployService) doDeploy(project *model.Project, body *model.DeployHistory) {
 	needPull := true
 	if project.Type == "project" {
 		// 1.pull code
-		s.deployHistoryService.DeployStepInto(body)
-		if err := s.gitService.Pull(project.LocalRepo); err != nil {
-			s.deployHistoryService.UpdateStatus(body.ID, model.DEPLOY_STATUS_FAILED, time.Since(now))
-			return err
+		if err := s.Pull(project, body); err != nil {
+			logrus.Error(err.Error())
+			return
 		}
-
 		//2.build image
-		s.deployHistoryService.DeployStepInto(body)
-		if err := s.Build(project.LocalRepo, body.Image); err != nil {
-			s.deployHistoryService.UpdateStatus(body.ID, model.DEPLOY_STATUS_FAILED, time.Since(now))
-			return err
+		if err := s.Build(project, body); err != nil {
+			logrus.Error(err.Error())
+			return
 		}
 		needPull = false
 	}
-
 	//3.run container
+	if err := s.Run(project, body, needPull); err != nil {
+		logrus.Error(err.Error())
+		return
+	}
+	//4.success
 	s.deployHistoryService.DeployStepInto(body)
-	if err := s.Run(project, needPull); err != nil {
-		s.deployHistoryService.UpdateStatus(body.ID, model.DEPLOY_STATUS_FAILED, time.Since(now))
+	s.deployHistoryService.UpdateStatus(body.ID, model.DEPLOY_STATUS_SUCCESS, time.Since(body.CreatedAt))
+}
+
+func (s DeployService) Pull(project *model.Project, body *model.DeployHistory) error {
+	topic := strconv.Itoa(int(body.ID))
+	s.deployHistoryService.DeployStepInto(body)
+	err := s.gitService.Pull(project.LocalRepo)
+	if err == nil {
+		s.kafkaCli.SendLog(kafka.PackMsg(topic, "git pull sucess", int32(body.Step)))
+	} else {
+		s.kafkaCli.SendLog(kafka.PackMsg(topic, err.Error(), int32(body.Step)))
+		if !errors.Is(err, git.NoErrAlreadyUpToDate) {
+			s.deployHistoryService.UpdateStatus(body.ID, model.DEPLOY_STATUS_FAILED, time.Since(body.CreatedAt))
+			return err
+		}
+	}
+	return nil
+}
+
+func (s DeployService) Build(project *model.Project, body *model.DeployHistory) error {
+	s.deployHistoryService.DeployStepInto(body)
+	if err := s.doBuild(project.LocalRepo, body.Image, body.ID); err != nil {
+		s.deployHistoryService.UpdateStatus(body.ID, model.DEPLOY_STATUS_FAILED, time.Since(body.CreatedAt))
 		return err
 	}
-	s.deployHistoryService.UpdateStatus(body.ID, model.DEPLOY_STATUS_SUCCESS, time.Since(now))
+	return nil
+}
 
-	project.AccessUrl = fmt.Sprintf("http://121.196.214.245:%d", project.BindPort)
-	//project.AccessUrl = fmt.Sprintf("http://%s-%s.%s:%d",project.Branch,project.UserName,viper.GetString("baseUrl"),project.BindPort)
-	return s.projectService.Update(project)
+func (s DeployService) Run(project *model.Project, body *model.DeployHistory, needPull bool) error {
+	s.deployHistoryService.DeployStepInto(body)
+	if err := s.doRun(project, needPull, body.ID); err != nil {
+		s.deployHistoryService.UpdateStatus(body.ID, model.DEPLOY_STATUS_FAILED, time.Since(body.CreatedAt))
+		return err
+	}
+	return nil
 }
 
 func (s DeployService) Clone(project *model.Project) error {
@@ -83,21 +120,26 @@ func (s DeployService) Clone(project *model.Project) error {
 	return nil
 }
 
-func (s DeployService) Build(path string, image string) error {
+func (s DeployService) doBuild(path string, image string, deployId uint) error {
 	if err := s.containerService.BuildImage(model.BuildImageOption{
-		Path: path,
-		Tag:  image,
+		Path:     path,
+		Tag:      image,
+		DeployID: deployId,
 	}); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (s DeployService) Run(req *model.Project, needPull bool) error {
+func (s DeployService) doRun(req *model.Project, needPull bool, deployID uint) error {
 	if req.Container != "" {
 		if err := s.containerService.RemoveContainer(req.Container); err != nil {
 			return err
 		}
+		s.kafkaCli.SendLog(
+			kafka.PackMsg(strconv.Itoa(int(deployID)),
+				fmt.Sprintf("remove old container {%s} success", req.Container),
+				model.DEPLOY_STEP_RUN))
 	}
 
 	if id, err := s.containerService.StartContainerWithOption(model.ContainerOption{
@@ -107,6 +149,7 @@ func (s DeployService) Run(req *model.Project, needPull bool) error {
 		Port:      strconv.Itoa(req.BindPort),
 		Env:       strings.Split(req.Env, ","),
 		NeedPull:  needPull,
+		DeployID:  deployID,
 	}); err != nil {
 		return err
 	} else {

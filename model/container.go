@@ -5,6 +5,7 @@ type BuildImageOption struct {
 	Tag        string
 	Version    string
 	Dockerfile string
+	DeployID   uint
 }
 
 type ContainerOption struct {
@@ -16,4 +17,9 @@ type ContainerOption struct {
 	ProtoPort string
 	Env       []string
 	NeedPull  bool
+	DeployID  uint
+}
+
+type LogStream struct {
+	Stream string `json:"stream"`
 }

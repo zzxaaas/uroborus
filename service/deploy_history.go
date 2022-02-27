@@ -2,17 +2,20 @@ package service
 
 import (
 	"time"
+	"uroborus/common/kafka"
 	"uroborus/model"
 	"uroborus/store"
 )
 
 type DeployHistoryService struct {
 	deployHistoryStore *store.DeployHistoryStore
+	kafkaCli           *kafka.Client
 }
 
-func NewDeployHistoryService(deployHistoryStore *store.DeployHistoryStore) *DeployHistoryService {
+func NewDeployHistoryService(deployHistoryStore *store.DeployHistoryStore, kafkaCli *kafka.Client) *DeployHistoryService {
 	return &DeployHistoryService{
 		deployHistoryStore: deployHistoryStore,
+		kafkaCli:           kafkaCli,
 	}
 }
 

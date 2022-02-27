@@ -1,4 +1,4 @@
-package common
+package docker
 
 import (
 	"github.com/docker/docker/client"

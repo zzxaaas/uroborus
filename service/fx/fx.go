@@ -15,4 +15,5 @@ var Module = fx.Options(
 	fx.Provide(NewContainerService),
 	fx.Provide(NewDeployService),
 	fx.Provide(NewDeployHistoryService),
+	fx.Provide(NewDeployLogService),
 )
