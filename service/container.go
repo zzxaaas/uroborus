@@ -56,17 +56,6 @@ func (s ContainerService) BuildImage(opt model.BuildImageOption) error {
 	}
 	defer resp.Body.Close()
 	s.ReaderToKafka(resp.Body, int(opt.DeployID), model.DEPLOY_STEP_BUILD)
-	//r := bufio.NewReader(resp.Body)
-	//for {
-	//	//循环从reader中根据换行符读取并转换为string
-	//	log, err := r.ReadString('\n')
-	//	if err != nil {
-	//		logrus.Error(err)
-	//		break
-	//	}
-	//	s.kafkaCli.SendLog(kafka.PackMsg(strconv.Itoa(int(opt.DeployID)),log,model.DEPLOY_STEP_BUILD))
-	//}
-
 	return nil
 }
 
@@ -86,7 +75,8 @@ func (s ContainerService) GetContainerLog(contianerID string) (io.Reader, error)
 func (s ContainerService) RemoveContainer(contianerID string) error {
 	ctx := context.Background()
 	s.cli.ContainerStop(ctx, contianerID, nil)
-	return s.cli.ContainerRemove(ctx, contianerID, types.ContainerRemoveOptions{})
+	s.cli.ContainerRemove(ctx, contianerID, types.ContainerRemoveOptions{})
+	return nil
 }
 
 func (s ContainerService) StartContainerWithOption(opt model.ContainerOption) (string, error) {
@@ -98,16 +88,6 @@ func (s ContainerService) StartContainerWithOption(opt model.ContainerOption) (s
 		}
 		defer out.Close()
 		s.ReaderToKafka(out, int(opt.DeployID), model.DEPLOY_STEP_BUILD)
-		//r := bufio.NewReader(out)
-		//for {
-		//	log, err := r.ReadString('\n')
-		//	if err != nil {
-		//		logrus.Error(err)
-		//		break
-		//	}
-		//	s.kafkaCli.SendLog(kafka.PackMsg(strconv.Itoa(int(opt.DeployID)),log,model.DEPLOY_STEP_BUILD))
-		//}
-
 	}
 
 	_, portMap, err := nat.ParsePortSpecs([]string{fmt.Sprintf("%s:%s", opt.Port, opt.ProtoPort)})
@@ -129,11 +109,11 @@ func (s ContainerService) StartContainerWithOption(opt model.ContainerOption) (s
 		s.sendMessage(topic, err.Error(), model.DEPLOY_STEP_RUN)
 		return "", err
 	}
-	s.sendMessage(topic, fmt.Sprintf("create container {%s} success", resp.ID), model.DEPLOY_STEP_RUN)
+	s.sendMessage(topic, fmt.Sprintf("create container {%s} success\n", resp.ID), model.DEPLOY_STEP_RUN)
 	if err := s.cli.ContainerStart(ctx, resp.ID, types.ContainerStartOptions{}); err != nil {
 		return "", err
 	}
-	s.sendMessage(topic, "start container success", model.DEPLOY_STEP_RUN)
+	s.sendMessage(topic, "start container success\n", model.DEPLOY_STEP_RUN)
 	return resp.ID, nil
 }
 

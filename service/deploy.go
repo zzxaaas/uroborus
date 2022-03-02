@@ -101,6 +101,7 @@ func (s DeployService) Build(project *model.Project, body *model.DeployHistory) 
 
 func (s DeployService) Run(project *model.Project, body *model.DeployHistory, needPull bool) error {
 	s.deployHistoryService.DeployStepInto(body)
+	project.Image = body.Image
 	if err := s.doRun(project, needPull, body.ID); err != nil {
 		s.deployHistoryService.UpdateStatus(body.ID, model.DEPLOY_STATUS_FAILED, time.Since(body.CreatedAt))
 		return err
@@ -138,7 +139,7 @@ func (s DeployService) doRun(req *model.Project, needPull bool, deployID uint) e
 		}
 		s.kafkaCli.SendLog(
 			kafka.PackMsg(strconv.Itoa(int(deployID)),
-				fmt.Sprintf("remove old container {%s} success", req.Container),
+				fmt.Sprintf("remove old container {%s} success\n", req.Container),
 				model.DEPLOY_STEP_RUN))
 	}
 
@@ -156,8 +157,8 @@ func (s DeployService) doRun(req *model.Project, needPull bool, deployID uint) e
 		req.Container = id
 	}
 
-	if err := s.projectService.Update(req); err != nil {
-		return err
-	}
+	//if err := s.projectService.Update(req); err != nil {
+	//	return err
+	//}
 	return nil
 }

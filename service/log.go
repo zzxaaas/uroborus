@@ -2,7 +2,6 @@ package service
 
 import (
 	"bufio"
-	"encoding/json"
 	"fmt"
 	"github.com/Shopify/sarama"
 	"github.com/gorilla/websocket"
@@ -45,27 +44,37 @@ func (s DeployLogService) GetLog(conn *websocket.Conn, body *model.DeployHistory
 		return err
 	}
 	logPath := s.getLogPath(project, body.ID)
-	step, err := s.GetLogFromFile(conn, logPath)
-	if err != nil {
+	//step, err := s.GetLogFromFile(conn, logPath)
+	//if err != nil {
+	//	return err
+	//}
+	step := 0
+	if err := s.GetLogFromKafka(int(body.ID), step, logPath, conn); err != nil {
 		return err
 	}
-	defer s.GetContainerLog(conn, project.Container)
-	if body.Step < model.DEPLOY_STEP_RUNING {
-		if err := s.GetLogFromKafka(int(body.ID), step, logPath, conn); err != nil {
-			return err
-		}
-	}
+	return nil
+}
 
+func (s DeployLogService) GetRunningLog(conn *websocket.Conn, body *model.DeployHistory) error {
+	if err := s.deployHistoryService.Get(body); err != nil {
+		return err
+	}
+	project := &model.Project{Model: model.Model{ID: body.Origin_ID}}
+	if _, err := s.projectService.Get(project); err != nil {
+		return err
+	}
+	s.GetContainerLog(conn, project.Container)
 	return nil
 }
 
 func (s DeployLogService) GetLogFromKafka(deployID, step int, logPath string, conn *websocket.Conn) error {
-	consumer, err := sarama.NewConsumer(viper.GetStringSlice("kafka.addrs"), nil)
+	config := sarama.NewConfig()
+	config.Consumer.Offsets.AutoCommit.Enable = true
+	consumer, err := sarama.NewConsumer(viper.GetStringSlice("kafka.addrs"), config)
 	if err != nil {
 		return err
 	}
 	defer consumer.Close()
-
 	topic := strconv.Itoa(deployID)
 	partitions, err := consumer.Partitions(topic)
 	if err != nil {
@@ -85,9 +94,15 @@ func (s DeployLogService) GetLogFromKafka(deployID, step int, logPath string, co
 				if strconv.Itoa(step) > string(m.Key) {
 					continue
 				}
-				info := fmt.Sprintf("%s<->%s", string(m.Key), string(m.Value))
+				value := string(m.Value)
+				// todo:特殊处理未知字符导致乱码
+				if strings.Contains(value, "go:") {
+					value = string(m.Value[5 : len(m.Value)-5])
+					value += "\n"
+				}
+				info := fmt.Sprintf("%s<->%s", string(m.Key), value)
 				err = conn.WriteJSON(info)
-				s.SaveToFile(logPath, string(m.Key), m.Value)
+				//s.SaveToFile(logPath, string(m.Key), m.Value)
 				if err != nil {
 					logrus.Error("err")
 				}
@@ -111,7 +126,7 @@ func (s DeployLogService) GetLogFromFile(conn *websocket.Conn, logPath string) (
 			if err != nil {
 				return lastStep, err
 			}
-			info := fmt.Sprintf("%d-%s", lastStep, string(log))
+			info := fmt.Sprintf("%d<->%s", lastStep, string(log))
 			err = conn.WriteJSON(info)
 			if err != nil {
 				return lastStep, err
@@ -154,9 +169,9 @@ func (s DeployLogService) GetContainerLog(conn *websocket.Conn, containerId stri
 			logrus.Error(err)
 			break
 		}
-		stream := model.LogStream{}
-		json.Unmarshal([]byte(log), &stream)
-		conn.WriteJSON(stream.Stream)
+		//todo: 去除无用字节前缀
+		fmt.Println(log)
+		conn.WriteJSON(string([]byte(log)[8:]))
 	}
 
 	return nil

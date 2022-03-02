@@ -75,3 +75,21 @@ func (s DeployServer) Log(c *gin.Context) {
 		return
 	}
 }
+
+func (s DeployServer) RunningLog(c *gin.Context) {
+	req := model.DeployHistory{}
+	if err := c.ShouldBindQuery(&req); err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+	ws, err := s.upgrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	defer ws.Close()
+	if err := s.deployLogService.GetRunningLog(ws, &req); err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+}
