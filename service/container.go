@@ -16,6 +16,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"uroborus/common/kafka"
 	"uroborus/model"
 )
@@ -131,6 +132,12 @@ func (s ContainerService) ReaderToKafka(reader io.Reader, deployID, step int) {
 		}
 		stream := model.LogStream{}
 		json.Unmarshal([]byte(log), &stream)
-		s.sendMessage(strconv.Itoa(deployID), stream.Stream, int32(step))
+		if strings.Contains(log, "status") {
+			log = stream.Status + "\n"
+		} else {
+			log = stream.Stream
+		}
+		s.sendMessage(strconv.Itoa(deployID), log, int32(step))
+
 	}
 }

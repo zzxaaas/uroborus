@@ -37,7 +37,11 @@ func (s DeployService) Deploy(body *model.DeployHistory) error {
 		return err
 	}
 	body.CreatedAt = time.Now()
-	body.Image = fmt.Sprintf("%s:%s-%s", project.Name, project.Branch, body.CreatedAt.Format("20060102.1504"))
+	if project.Type == "project" {
+		body.Image = fmt.Sprintf("%s:%s-%s", project.Name, project.Branch, body.CreatedAt.Format("20060102.1504"))
+	} else {
+		body.Image = project.Image
+	}
 	body.Status = model.DEPLOY_STATUS_RUNING
 	if err := s.deployHistoryService.CreateDeploy(body); err != nil {
 		return err
@@ -102,7 +106,7 @@ func (s DeployService) Build(project *model.Project, body *model.DeployHistory) 
 func (s DeployService) Run(project *model.Project, body *model.DeployHistory, needPull bool) error {
 	s.deployHistoryService.DeployStepInto(body)
 	project.Image = body.Image
-	if err := s.doRun(project, needPull, body.ID); err != nil {
+	if err := s.doRun(project, needPull, body); err != nil {
 		s.deployHistoryService.UpdateStatus(body.ID, model.DEPLOY_STATUS_FAILED, time.Since(body.CreatedAt))
 		return err
 	}
@@ -132,33 +136,33 @@ func (s DeployService) doBuild(path string, image string, deployId uint) error {
 	return nil
 }
 
-func (s DeployService) doRun(req *model.Project, needPull bool, deployID uint) error {
+func (s DeployService) doRun(req *model.Project, needPull bool, deploy *model.DeployHistory) error {
 	if req.Container != "" {
 		if err := s.containerService.RemoveContainer(req.Container); err != nil {
 			return err
 		}
 		s.kafkaCli.SendLog(
-			kafka.PackMsg(strconv.Itoa(int(deployID)),
+			kafka.PackMsg(strconv.Itoa(int(deploy.ID)),
 				fmt.Sprintf("remove old container {%s} success\n", req.Container),
 				model.DEPLOY_STEP_RUN))
 	}
 
 	if id, err := s.containerService.StartContainerWithOption(model.ContainerOption{
 		Name:      req.Name,
-		Image:     req.Image,
+		Image:     deploy.Image,
 		ProtoPort: req.Port,
 		Port:      strconv.Itoa(req.BindPort),
 		Env:       strings.Split(req.Env, ","),
 		NeedPull:  needPull,
-		DeployID:  deployID,
+		DeployID:  deploy.ID,
 	}); err != nil {
 		return err
 	} else {
 		req.Container = id
 	}
 
-	//if err := s.projectService.Update(req); err != nil {
-	//	return err
-	//}
+	if err := s.projectService.Update(req); err != nil {
+		return err
+	}
 	return nil
 }

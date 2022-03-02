@@ -22,4 +22,6 @@ type ContainerOption struct {
 
 type LogStream struct {
 	Stream string `json:"stream"`
+	Status string `json:"status"`
+	Id     string `json:"id"`
 }

@@ -16,20 +16,23 @@ import (
 )
 
 type ProjectService struct {
-	projectStore *store.ProjectStore
-	imageService *BaseImageService
-	gitService   *GitService
+	projectStore         *store.ProjectStore
+	imageService         *BaseImageService
+	deployHistoryService *DeployHistoryService
+	gitService           *GitService
 }
 
 func NewProjectService(
 	projectStore *store.ProjectStore,
 	imageService *BaseImageService,
 	gitService *GitService,
+	deployHistoryService *DeployHistoryService,
 ) *ProjectService {
 	return &ProjectService{
-		projectStore: projectStore,
-		imageService: imageService,
-		gitService:   gitService,
+		projectStore:         projectStore,
+		imageService:         imageService,
+		gitService:           gitService,
+		deployHistoryService: deployHistoryService,
 	}
 }
 
@@ -138,8 +141,21 @@ func (s ProjectService) initProjectPath(project *model.Project) error {
 //	return s.gitService.Checkout(req.LocalRepo, req.Branch, req.RemoteRepo)
 //}
 
-func (s ProjectService) Find(project model.Project) ([]model.Project, error) {
-	return s.projectStore.Find(project)
+func (s ProjectService) Find(project model.Project) ([]model.GetProjectResp, error) {
+	ans := make([]model.GetProjectResp, 0)
+	projects, err := s.projectStore.Find(project)
+	if err != nil {
+		return nil, nil
+	}
+	for _, project := range projects {
+		deploy := model.DeployHistory{Origin_ID: project.ID}
+		err := s.deployHistoryService.Get(&deploy)
+		if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, err
+		}
+		ans = append(ans, model.GetProjectResp{Project: project, DeployHistory: deploy})
+	}
+	return ans, nil
 }
 
 func (s ProjectService) clone(project *model.Project) error {

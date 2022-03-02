@@ -6,6 +6,11 @@ const (
 	LogfileBasePath    = "/log/"
 )
 
+type GetProjectResp struct {
+	Project       `json:"project"`
+	DeployHistory `json:"deploy_history"`
+}
+
 type Project struct {
 	Model
 	Image      string `json:"image" form:"image"`
@@ -20,7 +25,6 @@ type Project struct {
 	Command    string `json:"command" form:"command"`
 	Env        string `json:"env"`
 	Container  string `json:"container" form:"container"`
-	Status     string `json:"status" form:"status"`
 	UserName   string `json:"user_name"`
 	Dockerfile string `json:"dockerfile" form:"dockerfile"`
 	Type       string `json:"type" form:"type"`
