@@ -1,0 +1,46 @@
+{
+  "read": "2022-03-03t15:57:06.976850615z",
+  "preread": "0001-01-01t00:00:00z",
+  "pids_stats": {
+    "current": 38
+  },
+  "num_procs": 0,
+  "storage_stats": {},
+  "cpu_stats": {
+    "cpu_usage": {
+      "total_usage": 147302894921,
+      "percpu_usage": [
+        73804378731,
+        73498516190
+      ]
+    },
+    "system_cpu_usage": 37984962520000000,
+    "online_cpus": 2
+  },
+  "precpu_stats": {
+    "cpu_usage": {
+      "total_usage": 0,
+      "usage_in_kernelmode": 0,
+      "usage_in_usermode": 0
+    }
+  },
+  "memory_stats": {
+    "usage": 484978688,
+    "max_usage": 526225408,
+    "limit": 7918964736
+  },
+  "name": "/mysql-aaa",
+  "id": "65204c4e5fa1f98aad51bf60c0cae63424c97cb4ebba115ea14e2eaeb12f5004",
+  "networks": {
+    "eth0": {
+      "rx_bytes": 1002,
+      "rx_packets": 17,
+      "rx_errors": 0,
+      "rx_dropped": 0,
+      "tx_bytes": 142,
+      "tx_packets": 3,
+      "tx_errors": 0,
+      "tx_dropped": 0
+    }
+  }
+}

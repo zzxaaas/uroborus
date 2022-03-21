@@ -150,7 +150,7 @@ func (s ProjectService) Find(project model.Project) ([]model.GetProjectResp, err
 	for _, project := range projects {
 		deploy := model.DeployHistory{Origin_ID: project.ID}
 		err := s.deployHistoryService.Get(&deploy)
-		if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, err
 		}
 		ans = append(ans, model.GetProjectResp{Project: project, DeployHistory: deploy})

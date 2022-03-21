@@ -20,6 +20,7 @@ type Router struct {
 	projectServer   *server.ProjectServer
 	baseImageServer *server.BaseImageServer
 	deployServer    *server.DeployServer
+	containerServer *server.ContainerServer
 }
 
 // NewRouter Generator
@@ -31,6 +32,7 @@ func NewRouter(
 	projectServer *server.ProjectServer,
 	baseImageServer *server.BaseImageServer,
 	deployServer *server.DeployServer,
+	containerServer *server.ContainerServer,
 ) *Router {
 	return &Router{
 		config:          config,
@@ -40,6 +42,7 @@ func NewRouter(
 		projectServer:   projectServer,
 		baseImageServer: baseImageServer,
 		deployServer:    deployServer,
+		containerServer: containerServer,
 	}
 }
 
@@ -100,6 +103,13 @@ func (r *Router) Server(middlewares ...gin.HandlerFunc) *gin.Engine {
 			baseImageRoute.Use(middleware.Auth())
 			baseImageRoute.PUT("", r.baseImageServer.Register)
 			baseImageRoute.GET("", r.baseImageServer.Get)
+		}
+		{
+			containerRoute := app.Group(baseEngine.BasePath() + "/container")
+			containerRoute.GET("/exec", r.containerServer.Exec)
+
+			containerRoute.Use(middleware.Auth())
+			containerRoute.GET("", r.containerServer.GetAll)
 		}
 
 	}

@@ -13,6 +13,7 @@ import (
 	"github.com/jhoonb/archivex"
 	"github.com/sirupsen/logrus"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"strconv"
@@ -22,15 +23,17 @@ import (
 )
 
 type ContainerService struct {
-	cli      *client.Client
-	kafkaCli *kafka.Client
-	upGrader websocket.Upgrader
+	cli            *client.Client
+	projectService *ProjectService
+	kafkaCli       *kafka.Client
+	upGrader       websocket.Upgrader
 }
 
-func NewContainerService(cli *client.Client, kafkaCli *kafka.Client) *ContainerService {
+func NewContainerService(cli *client.Client, kafkaCli *kafka.Client, projectService *ProjectService) *ContainerService {
 	return &ContainerService{
-		cli:      cli,
-		kafkaCli: kafkaCli,
+		cli:            cli,
+		kafkaCli:       kafkaCli,
+		projectService: projectService,
 		upGrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {
 				return true
@@ -139,5 +142,131 @@ func (s ContainerService) ReaderToKafka(reader io.Reader, deployID, step int) {
 		}
 		s.sendMessage(strconv.Itoa(deployID), log, int32(step))
 
+	}
+}
+
+func (s ContainerService) GetAll(user string) (error, []model.GetContainerStatsResp) {
+	ctx := context.Background()
+	resp := make([]model.GetContainerStatsResp, 0)
+	projects, err := s.projectService.Find(model.Project{UserName: user})
+	if err != nil {
+		return err, nil
+	}
+	for _, p := range projects {
+		stats := types.StatsJSON{}
+		if p.Container == "" {
+			resp = append(resp, model.GetContainerStatsResp{Name: p.Name})
+			continue
+		}
+		reader, err := s.cli.ContainerStatsOneShot(ctx, p.Container)
+		if err != nil {
+			return err, nil
+		}
+
+		body, err := ioutil.ReadAll(reader.Body)
+		json.Unmarshal(body, &stats)
+		tmp := model.GetContainerStatsResp{
+			Name:     stats.Name[1:],
+			ID:       stats.ID[:12],
+			MemLimit: stats.MemoryStats.Limit,
+			MemUsage: stats.MemoryStats.Usage,
+			NETIn:    stats.Networks["eth0"].RxBytes,
+			NETOut:   stats.Networks["eth0"].TxBytes,
+		}
+		preCupUsage := 0
+		preSysUsage := 0
+		if preCupUsage != 0 || preSysUsage != 0 {
+			tmp.CPUUsage = calculateCPUPercentUnix(0, 0, &stats)
+		}
+		tmp.MemPercent = float64(stats.MemoryStats.Usage) / float64(stats.MemoryStats.Limit) * 100
+		resp = append(resp, tmp)
+	}
+	return nil, resp
+}
+
+func calculateCPUPercentUnix(previousCPU, previousSystem uint64, v *types.StatsJSON) float64 {
+	var (
+		cpuPercent = 0.0
+		// calculate the change for the cpu usage of the container in between readings
+		cpuDelta = float64(v.CPUStats.CPUUsage.TotalUsage) - float64(previousCPU)
+		// calculate the change for the entire system between readings
+		systemDelta = float64(v.CPUStats.SystemUsage) - float64(previousSystem)
+	)
+	if systemDelta > 0.0 && cpuDelta > 0.0 {
+		cpuPercent = (cpuDelta / systemDelta) * float64(len(v.CPUStats.CPUUsage.PercpuUsage)) * 100.0
+	}
+	return cpuPercent
+}
+
+func (s ContainerService) Terminal(conn *websocket.Conn, req model.ConnectContainerReq) error {
+	// 执行exec，获取到容器终端的连接
+	hr, err := s.exec(req.ID)
+	if err != nil {
+		return err
+	}
+	// 关闭I/O流
+	defer hr.Close()
+	// 退出进程
+	defer func() {
+		hr.Conn.Write([]byte("exit\r"))
+	}()
+
+	// 转发输入/输出至websocket
+	go func() {
+		wsWriterCopy(hr.Conn, conn)
+	}()
+	wsReaderCopy(conn, hr.Conn)
+	return nil
+}
+
+func (s ContainerService) exec(container string) (hr types.HijackedResponse, err error) {
+	ctx := context.Background()
+	// 执行/bin/bash命令
+	ir, err := s.cli.ContainerExecCreate(ctx, container, types.ExecConfig{
+		AttachStdin:  true,
+		AttachStdout: true,
+		AttachStderr: true,
+		Cmd:          []string{"/bin/bash"},
+		Tty:          true,
+	})
+	if err != nil {
+		return
+	}
+
+	// 附加到上面创建的/bin/bash进程中
+	hr, err = s.cli.ContainerExecAttach(ctx, ir.ID, types.ExecStartCheck{Detach: false, Tty: true})
+	if err != nil {
+		return
+	}
+	return
+}
+
+// 将终端的输出转发到前端
+func wsWriterCopy(reader io.Reader, writer *websocket.Conn) {
+	buf := make([]byte, 8192)
+	for {
+		nr, err := reader.Read(buf)
+		if nr > 0 {
+			err := writer.WriteMessage(websocket.BinaryMessage, buf[0:nr])
+			if err != nil {
+				return
+			}
+		}
+		if err != nil {
+			return
+		}
+	}
+}
+
+// 将前端的输入转发到终端
+func wsReaderCopy(reader *websocket.Conn, writer io.Writer) {
+	for {
+		messageType, p, err := reader.ReadMessage()
+		if err != nil {
+			return
+		}
+		if messageType == websocket.TextMessage {
+			writer.Write(p)
+		}
 	}
 }
