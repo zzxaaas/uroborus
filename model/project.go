@@ -7,6 +7,10 @@ const (
 	ImgfileBasePath    = "/img/"
 )
 
+const (
+	RedisKeyLogPrefix = "log"
+)
+
 type GetProjectResp struct {
 	Project       `json:"project"`
 	DeployHistory `json:"deploy_history"`

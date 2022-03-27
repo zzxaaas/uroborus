@@ -210,14 +210,14 @@ func (s ProjectService) RegisterGroupProject(req *model.RegisterGroupProjectReq,
 		return err
 	}
 	key := fmt.Sprintf("%s:%s", model.RedisKeyPrefix, strconv.Itoa(int(req.GroupId)))
-	s.rdsCli.IncrBy(key+"-pc", 1)
+	s.rdsCli.Incr(key + "-pc")
 	proj.UserName = user
 	projs, err := s.projectStore.Find(proj)
 	if err != nil {
 		return err
 	}
 	if len(projs) == 0 {
-		s.rdsCli.IncrBy(key+"-uc", 1)
+		s.rdsCli.Incr(key + "-uc")
 	}
 	return nil
 }

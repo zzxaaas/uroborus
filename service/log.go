@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/Shopify/sarama"
+	"github.com/go-redis/redis"
 	"github.com/gorilla/websocket"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -23,15 +24,24 @@ type DeployLogService struct {
 	gitService           *GitService
 	containerService     *ContainerService
 	kafkaCli             *kafka.Client
+	redisCli             *redis.Client
 }
 
-func NewDeployLogService(deployHistoryService *DeployHistoryService, projectService *ProjectService, gitService *GitService, containerService *ContainerService, kafkaCli *kafka.Client) *DeployLogService {
+func NewDeployLogService(
+	deployHistoryService *DeployHistoryService,
+	projectService *ProjectService,
+	gitService *GitService,
+	containerService *ContainerService,
+	kafkaCli *kafka.Client,
+	redisCli *redis.Client,
+) *DeployLogService {
 	return &DeployLogService{
 		deployHistoryService: deployHistoryService,
 		projectService:       projectService,
 		gitService:           gitService,
 		containerService:     containerService,
 		kafkaCli:             kafkaCli,
+		redisCli:             redisCli,
 	}
 }
 
@@ -44,11 +54,10 @@ func (s DeployLogService) GetLog(conn *websocket.Conn, body *model.DeployHistory
 		return err
 	}
 	logPath := s.getLogPath(project, body.ID)
-	//step, err := s.GetLogFromFile(conn, logPath)
-	//if err != nil {
-	//	return err
-	//}
-	step := 0
+	step, err := s.GetLogFromFile(conn, logPath)
+	if err != nil {
+		return err
+	}
 	if err := s.GetLogFromKafka(int(body.ID), step, logPath, conn); err != nil {
 		return err
 	}
@@ -80,34 +89,41 @@ func (s DeployLogService) GetLogFromKafka(deployID, step int, logPath string, co
 	if err != nil {
 		return err
 	}
+	key := fmt.Sprintf("%s:%s", model.RedisKeyLogPrefix, topic)
+
 	var wg sync.WaitGroup
 	for _, p := range partitions {
-		pc, err := consumer.ConsumePartition(topic, p, sarama.OffsetOldest)
+		offset, err := s.redisCli.Get(key).Int64()
+		if err != nil {
+			offset = sarama.OffsetOldest
+		}
+		pc, err := consumer.ConsumePartition(topic, p, offset)
 		defer pc.AsyncClose()
 		if err != nil {
 			return err
 		}
 		wg.Add(1)
-		go func(pc sarama.PartitionConsumer, part int32) {
+		go func(pc sarama.PartitionConsumer) {
 			defer wg.Done()
 			for m := range pc.Messages() {
 				if strconv.Itoa(step) > string(m.Key) {
 					continue
 				}
 				value := string(m.Value)
-				// todo:特殊处理未知字符导致乱码
+				// 特殊处理未知字节导致乱码
 				if strings.Contains(value, "go:") {
 					value = string(m.Value[5 : len(m.Value)-5])
 					value += "\n"
 				}
 				info := fmt.Sprintf("%s<->%s", string(m.Key), value)
 				err = conn.WriteJSON(info)
-				//s.SaveToFile(logPath, string(m.Key), m.Value)
+				s.SaveToFile(logPath, string(m.Key), m.Value)
+				s.redisCli.IncrBy(key, m.Offset)
 				if err != nil {
 					logrus.Error("err")
 				}
 			}
-		}(pc, p)
+		}(pc)
 		wg.Wait()
 	}
 	return nil
