@@ -13,4 +13,5 @@ var Module = fx.Options(
 	fx.Provide(NewBaseImageServer),
 	fx.Provide(NewDeployServer),
 	fx.Provide(NewContainerServer),
+	fx.Provide(NewGroupServer),
 )

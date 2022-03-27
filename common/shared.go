@@ -2,8 +2,12 @@ package common
 
 import (
 	"bytes"
+	"crypto/md5"
 	"encoding/binary"
+	"encoding/hex"
 	"fmt"
+	"io"
+	"mime/multipart"
 	"os"
 	"reflect"
 	"strconv"
@@ -248,4 +252,20 @@ func BytesToInt(bys []byte) int {
 	var data int64
 	binary.Read(bytebuff, binary.BigEndian, &data)
 	return int(data)
+}
+
+func Md5(file *multipart.FileHeader) string {
+	f, err := file.Open()
+	if err != nil {
+		return ""
+	}
+	defer f.Close()
+
+	m := md5.New()
+	_, err = io.Copy(m, f)
+	if err != nil {
+		return ""
+	}
+
+	return hex.EncodeToString(m.Sum(nil))
 }

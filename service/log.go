@@ -39,7 +39,7 @@ func (s DeployLogService) GetLog(conn *websocket.Conn, body *model.DeployHistory
 	if err := s.deployHistoryService.Get(body); err != nil {
 		return err
 	}
-	project := &model.Project{Model: model.Model{ID: body.Origin_ID}}
+	project := &model.Project{Model: model.Model{ID: body.OriginId}}
 	if _, err := s.projectService.Get(project); err != nil {
 		return err
 	}
@@ -59,7 +59,7 @@ func (s DeployLogService) GetRunningLog(conn *websocket.Conn, body *model.Deploy
 	if err := s.deployHistoryService.Get(body); err != nil {
 		return err
 	}
-	project := &model.Project{Model: model.Model{ID: body.Origin_ID}}
+	project := &model.Project{Model: model.Model{ID: body.OriginId}}
 	if _, err := s.projectService.Get(project); err != nil {
 		return err
 	}

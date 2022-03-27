@@ -5,12 +5,17 @@ import (
 	"fmt"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
+	"github.com/go-redis/redis"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gorm.io/gorm"
 	"math/rand"
+	"mime/multipart"
 	"os"
+	"path"
+	"strconv"
 	"strings"
+	"uroborus/common"
 	"uroborus/model"
 	"uroborus/store"
 )
@@ -20,6 +25,8 @@ type ProjectService struct {
 	imageService         *BaseImageService
 	deployHistoryService *DeployHistoryService
 	gitService           *GitService
+	groupService         *GroupService
+	rdsCli               *redis.Client
 }
 
 func NewProjectService(
@@ -27,12 +34,16 @@ func NewProjectService(
 	imageService *BaseImageService,
 	gitService *GitService,
 	deployHistoryService *DeployHistoryService,
+	groupService *GroupService,
+	rdsCli *redis.Client,
 ) *ProjectService {
 	return &ProjectService{
 		projectStore:         projectStore,
 		imageService:         imageService,
 		gitService:           gitService,
 		deployHistoryService: deployHistoryService,
+		groupService:         groupService,
+		rdsCli:               rdsCli,
 	}
 }
 
@@ -74,8 +85,8 @@ func (s ProjectService) Save(req *model.RegisterProjectReq) error {
 			return err
 		}
 	}
-	//project.AccessUrl = fmt.Sprintf("http://%s-%s.%s:%d",project.Branch,project.UserName,viper.GetString("baseUrl"),project.BindPort)
-	req.Project.AccessUrl = fmt.Sprintf("http://121.196.214.245:%d", req.Project.BindPort)
+	req.Project.AccessUrl = fmt.Sprintf("http://%s-%s.%s:%d", req.Project.Branch, req.Project.UserName, viper.GetString("baseUrl"), req.Project.BindPort)
+	//req.Project.AccessUrl = fmt.Sprintf("http://121.196.214.245:%d", req.Project.BindPort)
 	return s.projectStore.Save(&req.Project)
 }
 
@@ -115,14 +126,18 @@ func (s ProjectService) getImagePort(name string) (string, error) {
 	return resp[0].Port, nil
 }
 
-func (s ProjectService) initProjectPath(project *model.Project) error {
+func (s ProjectService) getBasePath(project *model.Project) string {
 	root := viper.GetString("root")
-	basePath := fmt.Sprintf("%s/%s/%s/%s", root, project.UserName, project.Branch, project.Name)
+	return fmt.Sprintf("%s/%s/%s/%s", root, project.UserName, project.Branch, project.Name)
+}
 
+func (s ProjectService) initProjectPath(project *model.Project) error {
+	basePath := s.getBasePath(project)
 	project.LocalRepo = basePath + model.RepoBasePath
 	dockerfilePath := basePath + model.DockerfileBasePath
 	logPath := basePath + model.LogfileBasePath
-	for _, path := range []string{project.LocalRepo, dockerfilePath, logPath} {
+	imgPath := basePath + model.ImgfileBasePath
+	for _, path := range []string{project.LocalRepo, dockerfilePath, logPath, imgPath} {
 		if err := os.MkdirAll(path, os.ModePerm); err != nil {
 			return err
 		}
@@ -131,16 +146,6 @@ func (s ProjectService) initProjectPath(project *model.Project) error {
 	return nil
 }
 
-//func (s ProjectService) CheckOut(req *model.Project) error {
-//	if err := s.projectStore.Update(req); err != nil {
-//		return err
-//	}
-//	if _, err := s.Get(req); err != nil {
-//		return err
-//	}
-//	return s.gitService.Checkout(req.LocalRepo, req.Branch, req.RemoteRepo)
-//}
-
 func (s ProjectService) Find(project model.Project) ([]model.GetProjectResp, error) {
 	ans := make([]model.GetProjectResp, 0)
 	projects, err := s.projectStore.Find(project)
@@ -148,12 +153,20 @@ func (s ProjectService) Find(project model.Project) ([]model.GetProjectResp, err
 		return nil, nil
 	}
 	for _, project := range projects {
-		deploy := model.DeployHistory{Origin_ID: project.ID}
+		deploy := model.DeployHistory{OriginId: project.ID}
 		err := s.deployHistoryService.Get(&deploy)
 		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, err
 		}
-		ans = append(ans, model.GetProjectResp{Project: project, DeployHistory: deploy})
+		resp := model.GetProjectResp{Project: project, DeployHistory: deploy}
+		if project.GroupId != 0 {
+			groups, err := s.groupService.Find(&model.Group{Model: model.Model{ID: project.GroupId}})
+			if err != nil {
+				return nil, err
+			}
+			resp.Group = groups[0]
+		}
+		ans = append(ans, resp)
 	}
 	return ans, nil
 }
@@ -179,4 +192,51 @@ func (s ProjectService) Get(project *model.Project) (bool, error) {
 		return false, err
 	}
 	return true, nil
+}
+
+func (s ProjectService) GetGroupProjects(req *model.Group) ([]model.GetProjectResp, error) {
+	projReq := model.Project{GroupId: req.ID, IsShow: model.ShowProjStatus}
+	resp, err := s.Find(projReq)
+	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+func (s ProjectService) RegisterGroupProject(req *model.RegisterGroupProjectReq, user string) error {
+	proj := model.Project{GroupId: req.GroupId}
+	proj.ID = req.ProjectId
+	if err := s.Update(&proj); err != nil {
+		return err
+	}
+	key := fmt.Sprintf("%s:%s", model.RedisKeyPrefix, strconv.Itoa(int(req.GroupId)))
+	s.rdsCli.IncrBy(key+"-pc", 1)
+	proj.UserName = user
+	projs, err := s.projectStore.Find(proj)
+	if err != nil {
+		return err
+	}
+	if len(projs) == 0 {
+		s.rdsCli.IncrBy(key+"-uc", 1)
+	}
+	return nil
+}
+
+func (s ProjectService) SaveProjectInfo(req *model.Project, file *multipart.FileHeader) (string, error) {
+	if file == nil {
+		req.SurfacePath = viper.GetString("default.surface")
+	} else {
+		fileExt := strings.ToLower(path.Ext(file.Filename))
+		if fileExt != ".png" && fileExt != ".jpg" && fileExt != ".gif" && fileExt != ".jpeg" {
+			return "", errors.New("上传失败!只允许png,jpg,gif,jpeg文件")
+		}
+		fileName := common.Md5(file)
+		basePath := s.getBasePath(req)
+		imgPath := basePath + model.ImgfileBasePath
+		req.SurfacePath = fmt.Sprintf("%s%s%s", imgPath, fileName, fileExt)
+	}
+	if err := s.projectStore.Update(req); err != nil {
+		return "", err
+	}
+	return req.SurfacePath, nil
 }

@@ -6,7 +6,6 @@ postgres:
   user: "root"
   passwd: "root"
   batchSize: 3000
-
 root: "./user/uroborus"
 registry:
   url: "https://registry.hub.docker.com"
@@ -16,3 +15,11 @@ kafka:
   addrs:
     - "121.196.214.245:9092"
   chanSize: 100000
+nginx:
+  conf: "./nginx.conf"
+default:
+  surface: "./common/default/default.png"
+redis:
+  host: "121.196.214.245:16379"
+  db: 0
+  password: "zzxaaas"

@@ -32,7 +32,7 @@ func NewDeployService(deployHistoryService *DeployHistoryService, projectService
 }
 
 func (s DeployService) Deploy(body *model.DeployHistory) error {
-	project := &model.Project{Model: model.Model{ID: body.Origin_ID}}
+	project := &model.Project{Model: model.Model{ID: body.OriginId}}
 	if _, err := s.projectService.Get(project); err != nil {
 		return err
 	}

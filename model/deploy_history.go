@@ -15,10 +15,10 @@ const (
 
 type DeployHistory struct {
 	Model
-	Origin_ID uint          `json:"origin_id" form:"origin_id"`
-	Branch    string        `json:"branch" form:"branch"`
-	Image     string        `json:"image" form:"image"`
-	Step      int           `json:"step" form:"step"`
-	Status    int           `json:"status" form:"status"`
-	Duration  time.Duration `json:"duration" form:"duration"`
+	OriginId uint          `json:"origin_id" form:"origin_id"`
+	Branch   string        `json:"branch" form:"branch"`
+	Image    string        `json:"image" form:"image"`
+	Step     int           `json:"step" form:"step"`
+	Status   int           `json:"status" form:"status"`
+	Duration time.Duration `json:"duration" form:"duration"`
 }

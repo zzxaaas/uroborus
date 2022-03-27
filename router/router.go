@@ -21,6 +21,7 @@ type Router struct {
 	baseImageServer *server.BaseImageServer
 	deployServer    *server.DeployServer
 	containerServer *server.ContainerServer
+	groupServer     *server.GroupServer
 }
 
 // NewRouter Generator
@@ -33,6 +34,7 @@ func NewRouter(
 	baseImageServer *server.BaseImageServer,
 	deployServer *server.DeployServer,
 	containerServer *server.ContainerServer,
+	groupServer *server.GroupServer,
 ) *Router {
 	return &Router{
 		config:          config,
@@ -43,6 +45,7 @@ func NewRouter(
 		baseImageServer: baseImageServer,
 		deployServer:    deployServer,
 		containerServer: containerServer,
+		groupServer:     groupServer,
 	}
 }
 
@@ -73,9 +76,6 @@ func (r *Router) Server(middlewares ...gin.HandlerFunc) *gin.Engine {
 		baseEngine := app.Group(r.config.ApiPrefix + ApiV1)
 		{
 			baseEngine.GET("/health", r.healthServer.CheckV1)
-			baseEngine.Use(middleware.Auth())
-			baseEngine.GET("/health/auth", r.healthServer.CheckV1)
-
 		}
 		{
 			userRoute := app.Group(baseEngine.BasePath() + "/user")
@@ -88,6 +88,9 @@ func (r *Router) Server(middlewares ...gin.HandlerFunc) *gin.Engine {
 			projectRoute.GET("", r.projectServer.Get)
 			projectRoute.PUT("", r.projectServer.Register)
 			projectRoute.DELETE("", r.projectServer.Delete)
+			projectRoute.GET("/group", r.projectServer.GetGroupProjs)
+			projectRoute.POST("/group", r.projectServer.RegisterGroupProj)
+			projectRoute.POST("/info", r.projectServer.SaveProjectInfo)
 		}
 		{
 			deployRoute := app.Group(baseEngine.BasePath() + "/deploy")
@@ -107,9 +110,15 @@ func (r *Router) Server(middlewares ...gin.HandlerFunc) *gin.Engine {
 		{
 			containerRoute := app.Group(baseEngine.BasePath() + "/container")
 			containerRoute.GET("/exec", r.containerServer.Exec)
-
 			containerRoute.Use(middleware.Auth())
 			containerRoute.GET("", r.containerServer.GetAll)
+		}
+		{
+			groupRoute := app.Group(baseEngine.BasePath() + "/group")
+			groupRoute.Use(middleware.Auth())
+			groupRoute.GET("", r.groupServer.Find)
+			groupRoute.POST("", r.groupServer.Register)
+			groupRoute.DELETE("", r.groupServer.Delete)
 		}
 
 	}

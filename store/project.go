@@ -25,7 +25,14 @@ func (s *ProjectStore) Save(body *model.Project) error {
 }
 
 func (s ProjectStore) Update(body *model.Project) error {
-	return s.db.Model(body).Where("name=?", body.Name).Updates(body).Error
+	baseSql := s.db.Model(body)
+	if body.Name != "" {
+		baseSql = baseSql.Where("name=?", body.Name)
+	}
+	if body.ID != 0 {
+		baseSql = baseSql.Where("id=?", body.ID)
+	}
+	return baseSql.Updates(body).Error
 }
 
 func (s ProjectStore) Delete(body *model.Project) error {

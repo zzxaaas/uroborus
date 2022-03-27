@@ -2,7 +2,6 @@ package service
 
 import (
 	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/plumbing"
 )
 
 //import "github.com/go-git/go-git/v5"
@@ -38,19 +37,4 @@ func (s GitService) Pull(directory string) error {
 		return err
 	}
 	return nil
-}
-
-func (s GitService) Checkout(directory, branch, url string) error {
-	r, err := git.PlainOpen(directory)
-	if err != nil && err != git.ErrRepositoryAlreadyExists {
-		return err
-	}
-	w, err := r.Worktree()
-	localRef := plumbing.NewBranchReferenceName(branch)
-	err = w.Checkout(&git.CheckoutOptions{
-		Branch: localRef,
-		Create: true,
-	})
-	err = w.Pull(&git.PullOptions{RemoteName: "origin"})
-	return err
 }
