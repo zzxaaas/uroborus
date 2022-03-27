@@ -1,5 +1,11 @@
 package model
 
+const (
+	RedisKeyCtnPrefix  = "container"
+	KeyCtnPreCpuSuffix = "-cpu"
+	KeyCtnPreSysSuffix = "-sys"
+)
+
 type ConnectContainerReq struct {
 	ID string `json:"id" form:"id"`
 }

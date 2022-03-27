@@ -9,6 +9,7 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	"github.com/docker/go-connections/nat"
+	"github.com/go-redis/redis"
 	"github.com/gorilla/websocket"
 	"github.com/jhoonb/archivex"
 	"github.com/sirupsen/logrus"
@@ -27,9 +28,15 @@ type ContainerService struct {
 	projectService *ProjectService
 	kafkaCli       *kafka.Client
 	upGrader       websocket.Upgrader
+	redisCli       *redis.Client
 }
 
-func NewContainerService(cli *client.Client, kafkaCli *kafka.Client, projectService *ProjectService) *ContainerService {
+func NewContainerService(
+	cli *client.Client,
+	kafkaCli *kafka.Client,
+	projectService *ProjectService,
+	redisCli *redis.Client,
+) *ContainerService {
 	return &ContainerService{
 		cli:            cli,
 		kafkaCli:       kafkaCli,
@@ -39,6 +46,7 @@ func NewContainerService(cli *client.Client, kafkaCli *kafka.Client, projectServ
 				return true
 			},
 		},
+		redisCli: redisCli,
 	}
 }
 
@@ -145,6 +153,18 @@ func (s ContainerService) ReaderToKafka(reader io.Reader, deployID, step int) {
 	}
 }
 
+func (s ContainerService) getCpuUsage(key string) (uint64, uint64) {
+	preCpuUsage, _ := s.redisCli.Get(key + model.KeyCtnPreCpuSuffix).Uint64()
+	preSysUsage, _ := s.redisCli.Get(key + model.KeyCtnPreSysSuffix).Uint64()
+	return preCpuUsage, preSysUsage
+}
+
+func (s ContainerService) setCpuUsage(key string, cpuUsage, sysUsage uint64) {
+	s.redisCli.Set(key+model.KeyCtnPreCpuSuffix, cpuUsage, -1)
+	s.redisCli.Set(key+model.KeyCtnPreSysSuffix, sysUsage, -1)
+	return
+}
+
 func (s ContainerService) GetAll(user string) (error, []model.GetContainerStatsResp) {
 	ctx := context.Background()
 	resp := make([]model.GetContainerStatsResp, 0)
@@ -173,13 +193,15 @@ func (s ContainerService) GetAll(user string) (error, []model.GetContainerStatsR
 			NETIn:    stats.Networks["eth0"].RxBytes,
 			NETOut:   stats.Networks["eth0"].TxBytes,
 		}
-		preCupUsage := 0
-		preSysUsage := 0
-		if preCupUsage != 0 || preSysUsage != 0 {
+		key := fmt.Sprintf("%s:%s", model.RedisKeyCtnPrefix, tmp.ID)
+		preCpuUsage, preSysUsage := s.getCpuUsage(key)
+		if preCpuUsage != 0 || preSysUsage != 0 {
 			tmp.CPUUsage = calculateCPUPercentUnix(0, 0, &stats)
 		}
+		s.setCpuUsage(key, stats.CPUStats.CPUUsage.TotalUsage, stats.CPUStats.SystemUsage)
 		tmp.MemPercent = float64(stats.MemoryStats.Usage) / float64(stats.MemoryStats.Limit) * 100
 		resp = append(resp, tmp)
+
 	}
 	return nil, resp
 }
@@ -193,7 +215,7 @@ func calculateCPUPercentUnix(previousCPU, previousSystem uint64, v *types.StatsJ
 		systemDelta = float64(v.CPUStats.SystemUsage) - float64(previousSystem)
 	)
 	if systemDelta > 0.0 && cpuDelta > 0.0 {
-		cpuPercent = (cpuDelta / systemDelta) * float64(len(v.CPUStats.CPUUsage.PercpuUsage)) * 100.0
+		cpuPercent = (cpuDelta / systemDelta) * float64(len(v.CPUStats.CPUUsage.PercpuUsage)) * 1000.0
 	}
 	return cpuPercent
 }
