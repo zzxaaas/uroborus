@@ -13,4 +13,5 @@ var Module = fx.Options(
 	fx.Provide(NewBaseImageStore),
 	fx.Provide(NewDeployHistoryStore),
 	fx.Provide(NewGroupStore),
+	fx.Provide(NewProjectCommentStore),
 )

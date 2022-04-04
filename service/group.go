@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"github.com/go-redis/redis"
+	"math/rand"
 	"strconv"
 	"uroborus/model"
 	"uroborus/store"
@@ -21,18 +22,24 @@ func NewGroupService(groupStore *store.GroupStore, rdsCli *redis.Client) *GroupS
 }
 
 func (s GroupService) Register(req *model.Group) error {
+	req.Code = strconv.Itoa(rand.Intn(100000000))
 	return s.groupStore.Save(req)
 }
 
 func (s GroupService) Find(req *model.Group) ([]model.Group, error) {
-	groups, err := s.groupStore.Find(req)
+	groups, err := s.groupStore.FindCreateGroup(req)
 	if err != nil {
 		return nil, err
 	}
+	joinGroup, err := s.groupStore.FindJoinGroup(req)
+	groups = append(groups, joinGroup...)
 	for i := range groups {
-		key := fmt.Sprintf("%s:%s", model.RedisKeyPrefix, strconv.Itoa(int(req.ID)))
-		groups[i].UserCount, _ = s.rdsCli.Get(key + model.KeyUserCountSuffix).Int()
-		groups[i].ProjectCount, _ = s.rdsCli.Get(key + model.KeyProjCountSuffix).Int()
+		key := fmt.Sprintf("%s:%d", model.RedisKeyPrefix, groups[i].ID)
+		groups[i].UserCount = s.rdsCli.SCard(key + model.KeyUserCountSuffix).Val()
+		groups[i].ProjectCount = s.rdsCli.SCard(key + model.KeyProjCountSuffix).Val()
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 	return groups, nil
 }

@@ -18,7 +18,7 @@ kafka:
 nginx:
   conf: "./nginx.conf"
 default:
-  surface: "./common/default/default.png"
+  surface: "E:/Code/GoProjects/src/uroborus/common/default/default.png"
 redis:
   host: "121.196.214.245:16379"
   db: 0

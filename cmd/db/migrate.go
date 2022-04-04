@@ -34,7 +34,9 @@ func main() {
 		&model.BaseImage{},
 		&model.DeployHistory{},
 		&model.Group{},
+		&model.ProjectComment{},
 	}
+	db.Exec("alter table projects drop column status;")
 	if *shouldDrop {
 		if err := db.Migrator().DropTable(models...); err != nil {
 			log.Fatal("Migrator drop table failed")

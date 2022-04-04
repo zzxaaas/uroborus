@@ -14,8 +14,9 @@ type Group struct {
 	Description  string `json:"description" form:"description"`
 	OriginId     uint   `json:"origin_id" form:"origin_id"`
 	CreateUser   string `json:"create_user" form:"create_user"`
-	UserCount    int    `json:"user_count" form:"user_count"`
-	ProjectCount int    `json:"project_count" form:"project_count"`
+	UserCount    int64  `json:"user_count" form:"user_count"`
+	ProjectCount int64  `json:"project_count" form:"project_count"`
+	Code         string `json:"code" form:"code"`
 }
 
 type GetGroupProjectResp struct {
@@ -24,6 +25,6 @@ type GetGroupProjectResp struct {
 }
 
 type RegisterGroupProjectReq struct {
-	ProjectId uint `json:"project_id" form:"project_id"`
-	GroupId   uint `json:"group_id" form:"group_id"`
+	Name string `json:"name" form:"name"`
+	Code string `json:"code" form:"code"`
 }

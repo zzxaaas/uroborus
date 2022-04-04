@@ -22,6 +22,7 @@ type Router struct {
 	deployServer    *server.DeployServer
 	containerServer *server.ContainerServer
 	groupServer     *server.GroupServer
+	commentServer   *server.ProjectCommentServer
 }
 
 // NewRouter Generator
@@ -35,6 +36,7 @@ func NewRouter(
 	deployServer *server.DeployServer,
 	containerServer *server.ContainerServer,
 	groupServer *server.GroupServer,
+	commentServer *server.ProjectCommentServer,
 ) *Router {
 	return &Router{
 		config:          config,
@@ -46,6 +48,7 @@ func NewRouter(
 		deployServer:    deployServer,
 		containerServer: containerServer,
 		groupServer:     groupServer,
+		commentServer:   commentServer,
 	}
 }
 
@@ -119,6 +122,12 @@ func (r *Router) Server(middlewares ...gin.HandlerFunc) *gin.Engine {
 			groupRoute.GET("", r.groupServer.Find)
 			groupRoute.POST("", r.groupServer.Register)
 			groupRoute.DELETE("", r.groupServer.Delete)
+		}
+		{
+			commentRoute := app.Group(baseEngine.BasePath() + "/comment")
+			commentRoute.Use(middleware.Auth())
+			commentRoute.GET("", r.commentServer.Find)
+			commentRoute.POST("", r.commentServer.Register)
 		}
 
 	}

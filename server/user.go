@@ -37,9 +37,11 @@ func (s UserServer) Login(c *gin.Context) {
 		return
 	}
 	token, err := s.userService.Login(&user)
+	user.Password = ""
+	resp := model.LoginResp{User: user, Token: token}
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"id_token": token})
+	c.JSON(http.StatusOK, resp)
 }

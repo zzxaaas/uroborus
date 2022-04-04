@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	gl "gorm.io/gorm/logger"
 	"uroborus/common/logging"
 	settings "uroborus/common/setting"
 )
@@ -20,7 +21,7 @@ func NewPgDB(config *settings.Config, logger *logging.ZapLogger) *DB {
 		postgresConfig.Host, postgresConfig.Port, postgresConfig.Username, postgresConfig.DBName, postgresConfig.Password)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		CreateBatchSize: postgresConfig.BatchSize,
-		//Logger:          gl.Default.LogMode(gl.Info),
+		Logger:          gl.Default.LogMode(gl.Info),
 	})
 	if err != nil {
 		logger.Sugar().Fatal("open dsn", dsn, "failed!", err)

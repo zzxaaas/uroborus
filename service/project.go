@@ -13,7 +13,6 @@ import (
 	"mime/multipart"
 	"os"
 	"path"
-	"strconv"
 	"strings"
 	"uroborus/common"
 	"uroborus/model"
@@ -146,17 +145,20 @@ func (s ProjectService) initProjectPath(project *model.Project) error {
 	return nil
 }
 
-func (s ProjectService) Find(project model.Project) ([]model.GetProjectResp, error) {
+func (s ProjectService) Find(req model.Project) ([]model.GetProjectResp, error) {
 	ans := make([]model.GetProjectResp, 0)
-	projects, err := s.projectStore.Find(project)
+	projects, err := s.projectStore.Find(req)
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
 	for _, project := range projects {
 		deploy := model.DeployHistory{OriginId: project.ID}
 		err := s.deployHistoryService.Get(&deploy)
 		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, err
+		}
+		if req.Status != 0 && deploy.Status != req.Status {
+			continue
 		}
 		resp := model.GetProjectResp{Project: project, DeployHistory: deploy}
 		if project.GroupId != 0 {
@@ -195,7 +197,7 @@ func (s ProjectService) Get(project *model.Project) (bool, error) {
 }
 
 func (s ProjectService) GetGroupProjects(req *model.Group) ([]model.GetProjectResp, error) {
-	projReq := model.Project{GroupId: req.ID, IsShow: model.ShowProjStatus}
+	projReq := model.Project{GroupId: req.ID, IsShow: model.ShowProjStatus, Status: model.DEPLOY_STATUS_SUCCESS, NeedGroup: true}
 	resp, err := s.Find(projReq)
 	if err != nil {
 		return nil, err
@@ -204,20 +206,24 @@ func (s ProjectService) GetGroupProjects(req *model.Group) ([]model.GetProjectRe
 }
 
 func (s ProjectService) RegisterGroupProject(req *model.RegisterGroupProjectReq, user string) error {
-	proj := model.Project{GroupId: req.GroupId}
-	proj.ID = req.ProjectId
+	groups, err := s.groupService.Find(&model.Group{Code: req.Code})
+	if err != nil {
+		return err
+	}
+	proj := model.Project{GroupId: groups[0].ID, IsShow: 1}
+	proj.Name = req.Name
 	if err := s.Update(&proj); err != nil {
 		return err
 	}
-	key := fmt.Sprintf("%s:%s", model.RedisKeyPrefix, strconv.Itoa(int(req.GroupId)))
-	s.rdsCli.Incr(key + "-pc")
+	key := fmt.Sprintf("%s:%d", model.RedisKeyPrefix, groups[0].ID)
+	err = s.rdsCli.SAdd(key+model.KeyProjCountSuffix, req.Name).Err()
 	proj.UserName = user
 	projs, err := s.projectStore.Find(proj)
 	if err != nil {
 		return err
 	}
 	if len(projs) == 0 {
-		s.rdsCli.Incr(key + "-uc")
+		s.rdsCli.SAdd(key+model.KeyUserCountSuffix, user)
 	}
 	return nil
 }

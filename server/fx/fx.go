@@ -14,4 +14,5 @@ var Module = fx.Options(
 	fx.Provide(NewDeployServer),
 	fx.Provide(NewContainerServer),
 	fx.Provide(NewGroupServer),
+	fx.Provide(NewProjectCommentServer),
 )

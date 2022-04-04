@@ -45,6 +45,10 @@ func (s *ProjectStore) Get(project *model.Project) error {
 
 func (s *ProjectStore) Find(project model.Project) ([]model.Project, error) {
 	ans := make([]model.Project, 0)
-	err := s.db.Find(&ans, project).Error
+	baseSQL := s.db.Model(model.Project{})
+	if project.NeedGroup {
+		baseSQL = baseSQL.Where("group_id=?", project.GroupId)
+	}
+	err := baseSQL.Find(&ans, project).Error
 	return ans, err
 }

@@ -37,6 +37,8 @@ type Project struct {
 	GroupId     uint   `json:"group_id" form:"group_id"`
 	IsShow      int    `json:"is_show" form:"is_show"`
 	SurfacePath string `json:"surface_path" form:"surface_path"`
+	Status      int    `gorm:"-"`
+	NeedGroup   bool   `gorm:"-" json:"need_group" form:"need_group"`
 }
 
 type RegisterProjectReq struct {
